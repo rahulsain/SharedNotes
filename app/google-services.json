@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "452714379990",
+    "project_id": "shared-notes-c8ef6",
+    "storage_bucket": "shared-notes-c8ef6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:452714379990:android:5076f7cc32e4a3be2e2777",
+        "android_client_info": {
+          "package_name": "com.rahuls.sharednotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "452714379990-7si2argiut3i7l3mm4d0sitqjs011684.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2JkDpRdq_FlD2yskuvi_4yQNK_I42XBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "452714379990-7si2argiut3i7l3mm4d0sitqjs011684.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
