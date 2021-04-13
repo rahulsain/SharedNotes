@@ -1,4 +1,4 @@
-package com.rahuls.sharednotes;
+package com.rahuls.sharednotes.note;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.rahuls.sharednotes.R;
 
 public class NoteDetails extends AppCompatActivity {
 

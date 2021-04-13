@@ -33,6 +33,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.rahuls.sharednotes.model.Note;
+import com.rahuls.sharednotes.note.AddNote;
+import com.rahuls.sharednotes.note.EditNote;
+import com.rahuls.sharednotes.note.NoteDetails;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -90,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         menu.getMenu().add("Edit").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                Intent intent = new Intent(v.getContext(),EditNote.class);
+                                Intent intent = new Intent(v.getContext(), EditNote.class);
                                 intent.putExtra("title",model.getTitle());
                                 intent.putExtra("content",model.getContent());
                                 intent.putExtra("noteId",docId);
@@ -146,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(v.getContext(),AddNote.class));
+                startActivity(new Intent(v.getContext(), AddNote.class));
             }
         });
 
