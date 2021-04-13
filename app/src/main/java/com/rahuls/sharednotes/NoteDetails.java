@@ -39,11 +39,11 @@ public class NoteDetails extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent = new Intent(view.getContext(),EditNote.class);
-//                intent.putExtra("title",data.getStringExtra("title"));
-//                intent.putExtra("content",data.getStringExtra("content"));
-//                intent.putExtra("noteId",data.getStringExtra("noteId"));
-//                startActivity(intent);
+                Intent intent = new Intent(view.getContext(),EditNote.class);
+                intent.putExtra("title",data.getStringExtra("title"));
+                intent.putExtra("content",data.getStringExtra("content"));
+                intent.putExtra("noteId",data.getStringExtra("noteId"));
+                startActivity(intent);
             }
         });
     }

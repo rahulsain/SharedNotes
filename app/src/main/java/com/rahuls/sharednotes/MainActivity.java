@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 holder.noteContent.setText(model.getContent());
                 final int colorCode = getRandomColor();
                 holder.mCardView.setBackgroundColor(holder.view.getResources().getColor(colorCode,null));
+                final String docId = noteAdapter.getSnapshots().getSnapshot(position).getId();
 
                 holder.view.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -69,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         intent.putExtra("title",model.getTitle());
                         intent.putExtra("content",model.getContent());
                         intent.putExtra("code",colorCode);
+                        intent.putExtra("noteId",docId);
                         view.getContext().startActivity(intent);
                     }
                 });
