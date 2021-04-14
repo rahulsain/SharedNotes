@@ -19,6 +19,8 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.rahuls.sharednotes.MainActivity;
 import com.rahuls.sharednotes.R;
 
@@ -80,6 +82,15 @@ public class Register extends AppCompatActivity {
                     public void onSuccess(AuthResult authResult) {
                         Toast.makeText(Register.this, "Notes are Synced.", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(getApplicationContext(),MainActivity.class));
+
+                        FirebaseUser firebaseUser = fAuth.getCurrentUser();
+                        UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(gUserName).build();
+
+                        firebaseUser.updateProfile(request);
+
+                        startActivity(new Intent(getApplicationContext(),MainActivity.class));
+
                     }
                 }).addOnFailureListener(new OnFailureListener() {
                     @Override

@@ -158,6 +158,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         noteLists.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         noteLists.setAdapter(noteAdapter);
 
+        View headerView = nav_view.getHeaderView(0);
+        TextView userName = headerView.findViewById(R.id.userDisplayName);
+        TextView userEmail = headerView.findViewById(R.id.userDisplayEmail);
+
+        if(user.isAnonymous()){
+            userEmail.setVisibility(View.GONE);
+            userName.setText("Temporary User");
+        } else {
+            userEmail.setText(user.getEmail());
+            userName.setText(user.getDisplayName());
+        }
+
         FloatingActionButton fab = findViewById(R.id.addNoteFloat);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
