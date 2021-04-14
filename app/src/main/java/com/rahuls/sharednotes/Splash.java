@@ -33,6 +33,7 @@ public class Splash extends AppCompatActivity {
 
                 if(fAuth.getCurrentUser() != null){
                     startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                    finish();
                 } else {
                     //new anonymous account
                     fAuth.signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {

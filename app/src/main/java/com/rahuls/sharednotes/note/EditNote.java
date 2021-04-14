@@ -14,6 +14,8 @@ import androidx.appcompat.widget.Toolbar;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.MainActivity;
@@ -28,6 +30,7 @@ public class EditNote extends AppCompatActivity {
     EditText editNoteTitle,editNoteContent;
     FirebaseFirestore fStore;
     ProgressBar spinner;
+    FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +40,7 @@ public class EditNote extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         fStore = fStore.getInstance();
+        user = FirebaseAuth.getInstance().getCurrentUser();
         spinner = findViewById(R.id.progressBar2);
 
         data = getIntent();
@@ -65,8 +69,8 @@ public class EditNote extends AppCompatActivity {
                 spinner.setVisibility(View.VISIBLE);
 
                 //save note
-                DocumentReference documentReference = fStore.collection("notes")
-                        .document(data.getStringExtra("noteId"));
+                DocumentReference documentReference = fStore.collection("notes").document(user.getUid())
+                        .collection("myNotes").document(data.getStringExtra("noteId"));
                 Map<String,Object> note = new HashMap<>();
                 note.put("title",nTitle);
                 note.put("content",nContent);
