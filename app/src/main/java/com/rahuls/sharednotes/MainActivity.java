@@ -1,5 +1,6 @@
-package com.rahuls.sharednotes;
+ package com.rahuls.sharednotes;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -16,9 +17,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -29,9 +32,12 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Note;
 import com.rahuls.sharednotes.note.AddNote;
 import com.rahuls.sharednotes.note.EditNote;
@@ -48,6 +54,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView noteLists;
     FirebaseFirestore fStore;
     FirestoreRecyclerAdapter<Note,NoteViewHolder> noteAdapter;
+    FirebaseUser user;
+    FirebaseAuth fAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +65,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
+        fAuth = FirebaseAuth.getInstance();
+        user = fAuth.getCurrentUser();
 
         Query query = fStore.collection("notes").orderBy("title",Query.Direction.DESCENDING);
 
@@ -157,15 +167,59 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        drawerLayout.closeDrawer(GravityCompat.START);
         switch (item.getItemId()){
             case R.id.addNote:
                 startActivity(new Intent(this,AddNote.class));
+                break;
+
+            case R.id.logout:
+                checkUser();
                 break;
 
             default:
                 Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
         }
         return false;
+    }
+
+    private void checkUser() {
+        //if user is real or not
+        if(user.isAnonymous()){
+            displayAlert();
+        } else {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(getApplicationContext(),Splash.class));
+            finish();
+        }
+    }
+
+    private void displayAlert() {
+        AlertDialog.Builder warning = new AlertDialog.Builder(this).setTitle("Are you sure?")
+                .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
+                .setPositiveButton("Sync Note", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(getApplicationContext(), Register.class));
+                        finish();
+                    }
+                }).setNegativeButton("Logout", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //ToDo: delete data created by the Temp User
+
+                        //TODO: delete the temp user
+
+                        user.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                startActivity(new Intent(getApplicationContext(),Splash.class));
+                                finish();
+                            }
+                        });
+                    }
+                });
+        warning.show();
     }
 
     @Override
