@@ -175,6 +175,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(this,AddNote.class));
                 break;
 
+            case R.id.sync:
+                if(user.isAnonymous()){
+                    startActivity(new Intent(this,Register.class));
+                } else {
+                    Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
             case R.id.logout:
                 checkUser();
                 break;
