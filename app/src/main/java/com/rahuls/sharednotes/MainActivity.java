@@ -37,6 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Note;
 import com.rahuls.sharednotes.note.AddNote;
@@ -177,7 +178,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             case R.id.sync:
                 if(user.isAnonymous()){
-                    startActivity(new Intent(this,Register.class));
+                    startActivity(new Intent(this, Login.class));
                 } else {
                     Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
                 }

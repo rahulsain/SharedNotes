@@ -48,6 +48,13 @@ public class Register extends AppCompatActivity {
 
         fAuth = FirebaseAuth.getInstance();
 
+        loginActivity.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(getApplicationContext(),Login.class));
+            }
+        });
+
         syncAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,6 +72,8 @@ public class Register extends AppCompatActivity {
                     rUserConfirmPassword.setError("Password do not match.");
                 }
 
+                progressBar.setVisibility(View.VISIBLE);
+
                 AuthCredential credential = EmailAuthProvider.getCredential(gUserEmail,gUserPassword);
                 fAuth.getCurrentUser().linkWithCredential(credential).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
@@ -76,6 +85,7 @@ public class Register extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(Register.this, "Failed to connect. Try Again.", Toast.LENGTH_SHORT).show();
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
 
