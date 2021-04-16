@@ -23,7 +23,7 @@
             android:backgroundTint="@android:color/transparent"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="@android:string/untitled"
+            android:hint="Title"
             android:textColor="#fff"
             android:textColorHint="#FFFFFF"
             android:textStyle="bold" />
