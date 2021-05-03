@@ -18,7 +18,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.rahuls.sharednotes.MainActivity;
+import com.rahuls.sharednotes.ui.MainActivity;
 import com.rahuls.sharednotes.R;
 
 import java.util.HashMap;
@@ -69,7 +69,7 @@ public class EditNote extends AppCompatActivity {
                 spinner.setVisibility(View.VISIBLE);
 
                 //save note
-                DocumentReference documentReference = fStore.collection("notes").document(user.getUid())
+                DocumentReference documentReference = fStore.collection("users").document(user.getUid())
                         .collection("myNotes").document(data.getStringExtra("noteId"));
                 Map<String,Object> note = new HashMap<>();
                 note.put("title",nTitle);

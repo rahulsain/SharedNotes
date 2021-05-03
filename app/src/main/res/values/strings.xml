@@ -12,4 +12,6 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="temp_user">Temporary User</string>
+    <string name="title_activity_create_group">CreateGroup</string>
 </resources>

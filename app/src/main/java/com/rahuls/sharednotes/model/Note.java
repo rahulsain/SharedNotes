@@ -3,10 +3,12 @@ package com.rahuls.sharednotes.model;
 public class Note {
     private String title;
     private String content;
+    private String createdOn;
 
-    public Note(){ }
+    public Note() {
+    }
 
-    public Note(String title,String content){
+    public Note(String title, String content) {
         this.title = title;
         this.content = content;
     }
@@ -27,4 +29,11 @@ public class Note {
         this.content = content;
     }
 
+    public String getCreatedOn() {
+        return createdOn;
+    }
+
+    public void setCreatedOn(String createdOn) {
+        this.createdOn = createdOn;
+    }
 }

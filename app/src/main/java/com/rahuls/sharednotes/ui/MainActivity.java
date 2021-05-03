@@ -1,6 +1,6 @@
- package com.rahuls.sharednotes;
+ package com.rahuls.sharednotes.ui;
 
-import android.content.DialogInterface;
+ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -37,6 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Note;
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fAuth = FirebaseAuth.getInstance();
         user = fAuth.getCurrentUser();
 
-        Query query = fStore.collection("notes").document(user.getUid())
+        Query query = fStore.collection("users").document(user.getUid())
                 .collection("myNotes").orderBy("title",Query.Direction.DESCENDING);
 
         //query notes > uid > mynotes
@@ -118,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         menu.getMenu().add("Delete").setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
                             @Override
                             public boolean onMenuItemClick(MenuItem item) {
-                                DocumentReference documentReference = fStore.collection("notes").document(user.getUid())
+                                DocumentReference documentReference = fStore.collection("users").document(user.getUid())
                                         .collection("myNotes").document(docId);
                                 documentReference.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -150,8 +151,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         noteLists = findViewById(R.id.notelist);
 
-        drawerLayout = findViewById(R.id.drawer);
-        nav_view = findViewById(R.id.nav_view);
+        drawerLayout = findViewById(R.id.drawer1);
+        nav_view = findViewById(R.id.nav_view1);
         nav_view.setNavigationItemSelectedListener(this);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open , R.string.close);
         drawerLayout.addDrawerListener(toggle);
@@ -167,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if(user.isAnonymous()){
             userEmail.setVisibility(View.GONE);
-            userName.setText("Temporary User");
+            userName.setText(R.string.temp_user);
         } else {
             userEmail.setText(user.getEmail());
             userName.setText(user.getDisplayName());
@@ -188,6 +189,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
         switch (item.getItemId()){
+            case R.id.groups:
+                startActivity(new Intent(this, CreateGroup.class));
+                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                break;
+
             case R.id.addNote:
                 startActivity(new Intent(this,AddNote.class));
                 overridePendingTransition(R.anim.slide_up,R.anim.slide_down);

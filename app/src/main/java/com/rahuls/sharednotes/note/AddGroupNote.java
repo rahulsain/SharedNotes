@@ -1,5 +1,6 @@
 package com.rahuls.sharednotes.note;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,12 +24,13 @@ import com.rahuls.sharednotes.R;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddNote extends AppCompatActivity {
+public class AddGroupNote extends AppCompatActivity {
 
     FirebaseFirestore fStore;
     EditText noteTitle,noteContent;
     ProgressBar progressBarSave;
     FirebaseUser user;
+    Intent data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,43 +45,39 @@ public class AddNote extends AppCompatActivity {
         noteContent = findViewById(R.id.addNoteContent);
 
         progressBarSave = findViewById(R.id.progressBar);
-        
+
+        data = getIntent();
+
+
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fab.setOnClickListener(view -> {
 
-                String nTitle = noteTitle.getText().toString();
-                String nContent = noteContent.getText().toString();
+            String nTitle = noteTitle.getText().toString();
+            String nContent = noteContent.getText().toString();
 
-                if(nTitle.isEmpty() || nContent.isEmpty()){
-                    Toast.makeText(AddNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                progressBarSave.setVisibility(View.VISIBLE);
-
-                //save note
-                DocumentReference documentReference = fStore.collection("users").document(user.getUid())
-                        .collection("myNotes").document();
-                Map<String,Object> note = new HashMap<>();
-                note.put("title",nTitle);
-                note.put("content",nContent);
-
-                documentReference.set(note).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(AddNote.this, "Note added", Toast.LENGTH_SHORT).show();
-                        onBackPressed();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(AddNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
-                        progressBarSave.setVisibility(View.INVISIBLE);
-                    }
-                });
+            if(nTitle.isEmpty() || nContent.isEmpty()){
+                Toast.makeText(AddGroupNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            progressBarSave.setVisibility(View.VISIBLE);
+
+            String gID = data.getStringExtra("groupId");
+
+            //save note
+            DocumentReference documentReference = fStore.collection("groups").document(gID)
+                    .collection("ourNotes").document();
+            Map<String,Object> note = new HashMap<>();
+            note.put("title",nTitle);
+            note.put("content",nContent);
+
+            documentReference.set(note).addOnSuccessListener(aVoid -> {
+                Toast.makeText(AddGroupNote.this, "Note added", Toast.LENGTH_SHORT).show();
+                onBackPressed();
+            }).addOnFailureListener(e -> {
+                Toast.makeText(AddGroupNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                progressBarSave.setVisibility(View.INVISIBLE);
+            });
         });
     }
 
