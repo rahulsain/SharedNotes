@@ -3,9 +3,9 @@
     <item android:title="General">
         <menu>
             <item
-                android:id="@+id/notes"
+                android:id="@+id/groups"
                 android:icon="@drawable/ic_event_note_black_24dp"
-                android:title="Notes" />
+                android:title="Groups" />
             <item
                 android:id="@+id/addNote"
                 android:icon="@drawable/ic_add_circle_black_24dp"

@@ -20,7 +20,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.rahuls.sharednotes.MainActivity;
+import com.rahuls.sharednotes.ui.MainActivity;
 import com.rahuls.sharednotes.R;
 
 public class Login extends AppCompatActivity {
@@ -75,7 +75,7 @@ public class Login extends AppCompatActivity {
                 if(fAuth.getCurrentUser().isAnonymous()){
                     FirebaseUser user = fAuth.getCurrentUser();
 
-                    fStore.collection("notes").document(user.getUid()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    fStore.collection("users").document(user.getUid()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(Login.this, "All Temp Notes are Deleted.", Toast.LENGTH_SHORT).show();

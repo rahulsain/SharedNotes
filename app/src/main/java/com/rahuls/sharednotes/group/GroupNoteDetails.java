@@ -1,4 +1,4 @@
-package com.rahuls.sharednotes.note;
+package com.rahuls.sharednotes.group;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,7 @@ import com.rahuls.sharednotes.R;
 
 import java.util.Objects;
 
-public class NoteDetails extends AppCompatActivity {
+public class GroupNoteDetails extends AppCompatActivity {
 
     Intent data;
 
@@ -39,10 +39,11 @@ public class NoteDetails extends AppCompatActivity {
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
-            Intent intent = new Intent(view.getContext(),EditNote.class);
+            Intent intent = new Intent(view.getContext(), EditGroupNote.class);
             intent.putExtra("title",data.getStringExtra("title"));
             intent.putExtra("content",data.getStringExtra("content"));
             intent.putExtra("noteId",data.getStringExtra("noteId"));
+            intent.putExtra("groupId",data.getStringExtra("groupId"));
             startActivity(intent);
         });
     }
