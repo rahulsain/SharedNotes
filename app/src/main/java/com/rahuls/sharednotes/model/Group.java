@@ -7,12 +7,12 @@ public class Group {
     private String CreatedBy;
     private String CreatedAt;
     private String GroupId;
-    private Map<String, Object> GroupMembers;
+    private Map<String, String> GroupMembers;
 
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, String createdAt, String groupId, Map<String, Object> groupMembers) {
+    public Group(String groupName, String createdBy, String createdAt, String groupId, Map<String, String> groupMembers) {
         GroupName = groupName;
         CreatedBy = createdBy;
         CreatedAt = createdAt;
@@ -52,11 +52,11 @@ public class Group {
         GroupId = groupId;
     }
 
-    public Map<String, Object> getGroupMembers() {
+    public Map<String, String> getGroupMembers() {
         return GroupMembers;
     }
 
-    public void setGroupMembers(Map<String, Object> groupMembers) {
+    public void setGroupMembers(Map<String, String> groupMembers) {
         GroupMembers = groupMembers;
     }
 

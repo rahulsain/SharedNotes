@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".note.AddGroup">
+    tools:context=".group.AddGroup">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -25,10 +25,11 @@
                 android:backgroundTint="@android:color/transparent"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:hint="Group Name"
+                android:hint="@string/group_name"
                 android:textColor="#fff"
                 android:textColorHint="#FFFFFF"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:autofillHints="true" />
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -46,6 +47,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:backgroundTint="@color/colorPrimaryDark"
         app:maxImageSize="30dp"
-        app:srcCompat="@drawable/ic_save_black_24dp" />
+        app:srcCompat="@drawable/ic_save_black_24dp"
+        android:contentDescription="@string/save_button" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

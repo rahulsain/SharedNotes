@@ -1,4 +1,4 @@
-package com.rahuls.sharednotes.note;
+package com.rahuls.sharednotes.group;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -69,6 +69,9 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
         fAuth = FirebaseAuth.getInstance();
         user = fAuth.getCurrentUser();
 
+        group = new Group();
+
+        group.setGroupId(getIntent().getStringExtra("groupId"));
 
 
         Query query = fStore.collection("groups").document(group.getGroupId())
@@ -89,11 +92,12 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                 final String docId = noteAdapter.getSnapshots().getSnapshot(position).getId();
 
                 holder.view.setOnClickListener(view -> {
-                    Intent intent = new Intent(view.getContext(), NoteDetails.class);
+                    Intent intent = new Intent(view.getContext(), GroupNoteDetails.class);
                     intent.putExtra("title",model.getTitle());
                     intent.putExtra("content",model.getContent());
                     intent.putExtra("code",colorCode);
                     intent.putExtra("noteId",docId);
+                    intent.putExtra("groupId",group.getGroupId());
                     view.getContext().startActivity(intent);
                 });
                 ImageView menuIcon = holder.view.findViewById(R.id.menuIcon);
@@ -102,10 +106,11 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                     PopupMenu menu = new PopupMenu(v.getContext(),v);
                     menu.setGravity(Gravity.END);
                     menu.getMenu().add("Edit").setOnMenuItemClickListener(item -> {
-                        Intent intent = new Intent(v.getContext(), EditNote.class);
+                        Intent intent = new Intent(v.getContext(), EditGroupNote.class);
                         intent.putExtra("title",model.getTitle());
                         intent.putExtra("content",model.getContent());
                         intent.putExtra("noteId", docId1);
+                        intent.putExtra("groupId",group.getGroupId());
                         startActivity(intent);
                         return false;
                     });

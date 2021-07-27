@@ -1,6 +1,5 @@
-package com.rahuls.sharednotes.note;
+package com.rahuls.sharednotes.group;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,9 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,13 +20,14 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.Group;
-import com.rahuls.sharednotes.roomdb.Notes;
-import com.rahuls.sharednotes.roomdb.NotesRVAdapter;
 import com.rahuls.sharednotes.roomdb.NotesViewModel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -40,9 +37,8 @@ public class AddGroup extends AppCompatActivity {
     EditText groupName, groupMember;
     ProgressBar progressBarSave;
     FirebaseUser user;
-    Intent data;
     Group group;
-    Map<String, Object> groupMembers;
+    Map<String, String> GroupMembers;
     NotesViewModel viewModel;
 
     @Override
@@ -59,19 +55,26 @@ public class AddGroup extends AppCompatActivity {
 
         progressBarSave = findViewById(R.id.progressBar);
 
-        data = getIntent();
+//        data = getIntent();
+
+        List<String> groupMembers = new ArrayList<>();
+        group = new Group();
+        GroupMembers = new HashMap<>();
 
         FloatingActionButton fab1 = findViewById(R.id.addGroupMember);
         fab1.setOnClickListener(view -> {
-            groupMembers.put("Email Id",groupMember.getText().toString());
+            groupMembers.add(groupMember.getText().toString());
+//            GroupMembers.put("Email Id",groupMembers.toString());
+            groupMember.setText("");
         });
+
 
 
         FloatingActionButton fab2 = findViewById(R.id.fab);
         fab2.setOnClickListener(view -> {
-
+            GroupMembers.put("Email Id", Arrays.toString(groupMembers.toArray()));
             group.setGroupName(groupName.getText().toString());
-            group.setGroupMembers(groupMembers);
+            group.setGroupMembers(GroupMembers);
 
             if(group.getGroupName().isEmpty() && group.getGroupMembers().isEmpty()){
                 Toast.makeText(this,"Name and Member cant be empty",Toast.LENGTH_SHORT).show();
@@ -104,33 +107,33 @@ public class AddGroup extends AppCompatActivity {
             });
         });
 
-        RecyclerView memberList = findViewById(R.id.memberList);
-        memberList.setLayoutManager(new LinearLayoutManager);
-        NotesRVAdapter adapter = new NotesRVAdapter(this,this);
-        memberList.setAdapter(adapter);
+//        RecyclerView memberList = findViewById(R.id.memberList);
+//        memberList.setLayoutManager(new LinearLayoutManager());
+//        NotesRVAdapter adapter = new NotesRVAdapter(this,this);
+//        memberList.setAdapter(adapter);
 
-        viewModel = new ViewModelProvider(this,
-                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(NotesViewModel::class.java);
-        viewModel.getAllNotes().observe(this, {
-                list -> list?.let {
-                adapter.updateList(it)}});
+//        viewModel = new ViewModelProvider(this,
+//                ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(NotesViewModel::class.java);
+//        viewModel.getAllNotes().observe(this, {
+//                list -> list?.let {
+//                adapter.updateList(it)}});
 
     }
 
 
 
-    override fun onItemClicked(notes:Notes) {
-        viewModel.deleteNotes(notes)
-        Toast.makeText(this, "${notes.text} Deleted",Toast.LENGTH_LONG).show()
-    }
-
-    void submitdata(View view) {
-        notesText = input.text.toString();
-        if(notesText.isNotEmpty()){
-            viewModel.insertNotes(Notes((notesText)));
-            Toast.makeText(this, "$notesText Inserted",Toast.LENGTH_LONG).show();
-        }
-    }
+//    override fun onItemClicked(notes:Notes) {
+//        viewModel.deleteNotes(notes)
+//        Toast.makeText(this, "${notes.text} Deleted",Toast.LENGTH_LONG).show()
+//    }
+//
+//    void submitData(View view) {
+//        notesText = input.text.toString();
+//        if(notesText.isNotEmpty()){
+//            viewModel.insertNotes(Notes((notesText)));
+//            Toast.makeText(this, "$notesText Inserted",Toast.LENGTH_LONG).show();
+//        }
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

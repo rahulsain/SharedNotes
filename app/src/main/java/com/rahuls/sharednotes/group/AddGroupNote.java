@@ -1,4 +1,4 @@
-package com.rahuls.sharednotes.note;
+package com.rahuls.sharednotes.group;
 
 import android.content.Intent;
 import android.os.Bundle;

@@ -12,7 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".note.AddGroup"
+            android:name=".group.AddGroup"
             android:label="@string/title_activity_add_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -20,7 +20,7 @@
             android:label="@string/title_activity_create_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".note.SharedNote"
+            android:name=".group.SharedNote"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.Splash"
@@ -37,16 +37,22 @@
             android:name=".note.EditNote"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".group.EditGroupNote"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".note.AddNote"
             android:label="@string/title_activity_add_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".note.AddGroupNote"
+            android:name=".group.AddGroupNote"
             android:label="@string/title_activity_add_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".note.NoteDetails"
             android:label="@string/title_activity_note_details"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".group.GroupNoteDetails"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.MainActivity"

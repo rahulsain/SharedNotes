@@ -34,9 +34,9 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
-import com.rahuls.sharednotes.note.AddGroup;
-import com.rahuls.sharednotes.note.AddGroupNote;
-import com.rahuls.sharednotes.note.SharedNote;
+import com.rahuls.sharednotes.group.AddGroup;
+import com.rahuls.sharednotes.group.AddGroupNote;
+import com.rahuls.sharednotes.group.SharedNote;
 
 public class CreateGroup extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -63,6 +63,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
 
         Query query = fStore.collection("groups");
 
+        Intent data = getIntent();
 
         FirestoreRecyclerOptions<Group> allNotes = new FirestoreRecyclerOptions.Builder<Group>()
                 .setQuery(query, Group.class).build();
@@ -74,7 +75,8 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                 final String groupId = groupAdapter.getSnapshots().getSnapshot(position).getId();
 
                 holder.view.setOnClickListener(view -> {
-                    startActivity(new Intent(view.getContext(), SharedNote.class));
+                    Intent intent = new Intent(CreateGroup.this, SharedNote.class).putExtra("groupId",groupId);
+                    startActivity(intent);
                 });
             }
 

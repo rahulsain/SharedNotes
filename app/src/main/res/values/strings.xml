@@ -14,4 +14,8 @@
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="temp_user">Temporary User</string>
     <string name="title_activity_create_group">CreateGroup</string>
+    <string name="group_members_add_their_email_id">Group Members - Add their Email ID</string>
+    <string name="add_button">Add Button</string>
+    <string name="group_name">Group Name</string>
+    <string name="save_button">Save Button</string>
 </resources>
