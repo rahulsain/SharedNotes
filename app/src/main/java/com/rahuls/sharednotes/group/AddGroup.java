@@ -20,7 +20,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.Group;
-import com.rahuls.sharednotes.roomdb.NotesViewModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class AddGroup extends AppCompatActivity {
 
@@ -38,8 +38,8 @@ public class AddGroup extends AppCompatActivity {
     ProgressBar progressBarSave;
     FirebaseUser user;
     Group group;
-    Map<String, String> GroupMembers;
-    NotesViewModel viewModel;
+
+//    NotesViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,19 +59,25 @@ public class AddGroup extends AppCompatActivity {
 
         List<String> groupMembers = new ArrayList<>();
         group = new Group();
-        GroupMembers = new HashMap<>();
+
 
         FloatingActionButton fab1 = findViewById(R.id.addGroupMember);
         fab1.setOnClickListener(view -> {
-            groupMembers.add(groupMember.getText().toString());
-//            GroupMembers.put("Email Id",groupMembers.toString());
-            groupMember.setText("");
+            String groupMemberEmail = groupMember.getText().toString();
+            if(isValid(groupMemberEmail)){
+                groupMembers.add(groupMemberEmail);
+                groupMember.setText("");
+            } else {
+                Toast.makeText(getApplicationContext(),"Not a Valid Email",Toast.LENGTH_SHORT).show();
+            }
+
         });
 
 
 
         FloatingActionButton fab2 = findViewById(R.id.fab);
         fab2.setOnClickListener(view -> {
+            Map<String, String> GroupMembers = new HashMap<>();
             GroupMembers.put("Email Id", Arrays.toString(groupMembers.toArray()));
             group.setGroupName(groupName.getText().toString());
             group.setGroupMembers(GroupMembers);
@@ -149,5 +155,18 @@ public class AddGroup extends AppCompatActivity {
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public static boolean isValid(String email)
+    {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+
+        Pattern pat = Pattern.compile(emailRegex);
+        if (email == null)
+            return false;
+        return pat.matcher(email).matches();
     }
 }
