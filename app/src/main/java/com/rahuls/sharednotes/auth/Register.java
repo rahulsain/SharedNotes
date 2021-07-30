@@ -40,6 +40,7 @@ public class Register extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
+    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,20 @@ public class Register extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Connect to SharedNotes");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        fAuth = FirebaseAuth.getInstance();
+        fStore = FirebaseFirestore.getInstance();
+
+//        if (fAuth.getCurrentUser() != null) {
+            // User is signed in
+            userID = fAuth.getCurrentUser().getUid();
+//        } else {
+//            // No user is signed in
+//            userID = "NotSignedIn";
+//            Toast.makeText(this,"App may crash, sign in required to continue. Try Again",Toast.LENGTH_SHORT).show();
+//            finish();
+//        }
+
 
         rUserName = findViewById(R.id.userName);
         rUserEmail = findViewById(R.id.userEmail);
@@ -57,12 +72,6 @@ public class Register extends AppCompatActivity {
         loginActivity = findViewById(R.id.login);
         progressBar = findViewById(R.id.progressBar4);
 
-
-
-        fAuth = FirebaseAuth.getInstance();
-        fStore = FirebaseFirestore.getInstance();
-
-
         loginActivity.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),Login.class)));
 
 
@@ -71,8 +80,6 @@ public class Register extends AppCompatActivity {
             String gUserConfirmPassword = rUserConfirmPassword.getText().toString();
             String gUserName = rUserName.getText().toString();
             String gUserEmail = rUserEmail.getText().toString();
-
-            String userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
 
             User userM = new User(gUserName,gUserEmail,userID);
 

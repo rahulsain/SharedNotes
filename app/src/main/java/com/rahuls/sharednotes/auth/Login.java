@@ -2,6 +2,7 @@ package com.rahuls.sharednotes.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -46,11 +47,10 @@ public class Login extends AppCompatActivity {
         forgetPassword = findViewById(R.id.forgotPasword);
         createAccount = findViewById(R.id.createAccount);
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
-
         fStore = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
 
+        user = fAuth.getCurrentUser();
 
         showWarning();
 
@@ -81,13 +81,24 @@ public class Login extends AppCompatActivity {
                 Toast.makeText(Login.this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }).addOnFailureListener(e -> {
-                Toast.makeText(Login.this, "Login Failed! " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(Login.this, "Login Failed! " + e.getMessage() + " Restart the App!", Toast.LENGTH_LONG).show();
                 spinner.setVisibility(View.GONE);
+
+                //fore - close the app
+
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    // Do something after 5s = 5000ms
+                    moveTaskToBack(true);
+                    android.os.Process.killProcess(android.os.Process.myPid());
+                    System.exit(1);
+                }, 6000);
+
             });
 
         });
 
-        createAccount.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),Register.class)));
+        createAccount.setOnClickListener(v -> startActivity(new Intent(this,Register.class)));
         forgetPassword.setOnClickListener(v -> Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show());
     }
 
