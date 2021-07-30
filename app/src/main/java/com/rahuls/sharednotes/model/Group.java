@@ -1,18 +1,18 @@
 package com.rahuls.sharednotes.model;
 
-import java.util.Map;
+import java.util.List;
 
 public class Group {
     private String GroupName;
     private String CreatedBy;
     private String CreatedAt;
     private String GroupId;
-    private Map<String, String> GroupMembers;
+    private List<String> GroupMembers;
 
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, String createdAt, String groupId, Map<String, String> groupMembers) {
+    public Group(String groupName, String createdBy, String createdAt, String groupId, List<String> groupMembers) {
         GroupName = groupName;
         CreatedBy = createdBy;
         CreatedAt = createdAt;
@@ -52,11 +52,11 @@ public class Group {
         GroupId = groupId;
     }
 
-    public Map<String, String> getGroupMembers() {
+    public List<String> getGroupMembers() {
         return GroupMembers;
     }
 
-    public void setGroupMembers(Map<String, String> groupMembers) {
+    public void setGroupMembers(List<String> groupMembers) {
         GroupMembers = groupMembers;
     }
 

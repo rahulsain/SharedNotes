@@ -73,6 +73,7 @@ public class EditGroupNote extends AppCompatActivity {
                 Toast.makeText(EditGroupNote.this, "Note saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), SharedNote.class);
                 intent.putExtra("groupId",data.getStringExtra("groupId"));
+                intent.putExtra("UserName",data.getStringExtra("UserName"));
                 startActivity(intent);
             }).addOnFailureListener(e -> {
                 Toast.makeText(EditGroupNote.this, "Error, try again", Toast.LENGTH_SHORT).show();

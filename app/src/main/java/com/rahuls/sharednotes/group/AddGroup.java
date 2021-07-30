@@ -22,7 +22,6 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.Group;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import java.util.regex.Pattern;
 
 public class AddGroup extends AppCompatActivity {
 
+//    private static final String TAG = "AddGroup";
     FirebaseFirestore fStore;
     EditText groupName, groupMember;
     ProgressBar progressBarSave;
@@ -64,26 +64,28 @@ public class AddGroup extends AppCompatActivity {
         FloatingActionButton fab1 = findViewById(R.id.addGroupMember);
         fab1.setOnClickListener(view -> {
             String groupMemberEmail = groupMember.getText().toString();
-            if(isValid(groupMemberEmail)){
+            if (isValid(groupMemberEmail)) {
                 groupMembers.add(groupMemberEmail);
                 groupMember.setText("");
             } else {
-                Toast.makeText(getApplicationContext(),"Not a Valid Email",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Not a Valid Email", Toast.LENGTH_SHORT).show();
             }
+
+//            checkEmailExistsOrNot(groupMemberEmail);
 
         });
 
 
-
         FloatingActionButton fab2 = findViewById(R.id.fab);
         fab2.setOnClickListener(view -> {
-            Map<String, String> GroupMembers = new HashMap<>();
-            GroupMembers.put("Email Id", Arrays.toString(groupMembers.toArray()));
+//            Map<String, Object> GroupMembers = new HashMap<>();
+//            String str = Arrays.toString(groupMembers.toArray());
+//            GroupMembers.put("Email Id", groupMembers);
             group.setGroupName(groupName.getText().toString());
-            group.setGroupMembers(GroupMembers);
+            group.setGroupMembers(groupMembers);
 
-            if(group.getGroupName().isEmpty() && group.getGroupMembers().isEmpty()){
-                Toast.makeText(this,"Name and Member cant be empty",Toast.LENGTH_SHORT).show();
+            if (group.getGroupName().isEmpty() && group.getGroupMembers().isEmpty()) {
+                Toast.makeText(this, "Name and Member cant be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -97,12 +99,12 @@ public class AddGroup extends AppCompatActivity {
 
             //save note
             DocumentReference documentReference = fStore.collection("groups").document(group.getGroupId());
-            Map<String,Object> groupDetails = new HashMap<>();
-            groupDetails.put("GroupName",group.getGroupName());
-            groupDetails.put("CreatedBy",group.getCreatedBy());
-            groupDetails.put("CreatedAt",group.getCreatedAt());
-            groupDetails.put("GroupId",group.getGroupId());
-            groupDetails.put("GroupMembers",group.getGroupMembers());
+            Map<String, Object> groupDetails = new HashMap<>();
+            groupDetails.put("GroupName", group.getGroupName());
+            groupDetails.put("CreatedBy", group.getCreatedBy());
+            groupDetails.put("CreatedAt", group.getCreatedAt());
+            groupDetails.put("GroupId", group.getGroupId());
+            groupDetails.put("GroupMembers", group.getGroupMembers());
 
             documentReference.set(groupDetails).addOnSuccessListener(aVoid -> {
                 Toast.makeText(this, "Group Created", Toast.LENGTH_SHORT).show();
@@ -124,8 +126,20 @@ public class AddGroup extends AppCompatActivity {
 //                list -> list?.let {
 //                adapter.updateList(it)}});
 
+
     }
 
+    private boolean isValid(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+
+        Pattern pat = Pattern.compile(emailRegex);
+        if (email == null)
+            return false;
+        return pat.matcher(email).matches();
+    }
 
 
 //    override fun onItemClicked(notes:Notes) {
@@ -144,29 +158,53 @@ public class AddGroup extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.close_menu,menu);
+        inflater.inflate(R.menu.close_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.close){
-            Toast.makeText(this, "Group not created",Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.close) {
+            Toast.makeText(this, "Group not created", Toast.LENGTH_SHORT).show();
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }
 
-    public static boolean isValid(String email)
-    {
-        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\."+
-                "[a-zA-Z0-9_+&*-]+)*@" +
-                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
-                "A-Z]{2,7}$";
+//    void checkEmailExistsOrNot(String email){
+//        FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
+//            Log.d(TAG,""+task.getResult().getSignInMethods().size());
+//            if (task.getResult().getSignInMethods().size() == 0){
+//                // email not existed
+//
+//            }else {
+//                // email existed
+//                updateUserData(email);
+//            }
+//
+//        }).addOnFailureListener(Throwable::printStackTrace);
+//    }
 
-        Pattern pat = Pattern.compile(emailRegex);
-        if (email == null)
-            return false;
-        return pat.matcher(email).matches();
-    }
+//    private void updateUserData(String email) {
+//        DocumentReference documentReference = fStore.collection("users").document(user.getUid());
+//        FirebaseDatabase.getInstance().getReference().addValueEventListener(new ValueEventListener() {
+//            private String emailDB;
+//
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+//                    User user = snapshot.getValue(User.class);
+//
+//                    emailDB = Objects.requireNonNull(user).getUserEmail();
+//
+//                        if(emailDB.equals(email)){
+//                            //add this to User database
+//
+//                        }
+//                }
+//            }
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {}
+//        });
+//    }
 }

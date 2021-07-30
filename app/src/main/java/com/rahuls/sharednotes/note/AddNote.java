@@ -13,8 +13,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,41 +45,32 @@ public class AddNote extends AppCompatActivity {
         progressBarSave = findViewById(R.id.progressBar);
         
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fab.setOnClickListener(view -> {
 
-                String nTitle = noteTitle.getText().toString();
-                String nContent = noteContent.getText().toString();
+            String nTitle = noteTitle.getText().toString();
+            String nContent = noteContent.getText().toString();
 
-                if(nTitle.isEmpty() || nContent.isEmpty()){
-                    Toast.makeText(AddNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                progressBarSave.setVisibility(View.VISIBLE);
-
-                //save note
-                DocumentReference documentReference = fStore.collection("users").document(user.getUid())
-                        .collection("myNotes").document();
-                Map<String,Object> note = new HashMap<>();
-                note.put("title",nTitle);
-                note.put("content",nContent);
-
-                documentReference.set(note).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(AddNote.this, "Note added", Toast.LENGTH_SHORT).show();
-                        onBackPressed();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(AddNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
-                        progressBarSave.setVisibility(View.INVISIBLE);
-                    }
-                });
+            if(nTitle.isEmpty() || nContent.isEmpty()){
+                Toast.makeText(AddNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
+                return;
             }
+
+            progressBarSave.setVisibility(View.VISIBLE);
+
+            //save note
+            DocumentReference documentReference = fStore.collection("users").document(user.getUid())
+                    .collection("myNotes").document();
+            Map<String,Object> note = new HashMap<>();
+            note.put("title",nTitle);
+            note.put("content",nContent);
+
+            documentReference.set(note).addOnSuccessListener(aVoid -> {
+                Toast.makeText(AddNote.this, "Note added", Toast.LENGTH_SHORT).show();
+                onBackPressed();
+            }).addOnFailureListener(e -> {
+                Toast.makeText(AddNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                progressBarSave.setVisibility(View.INVISIBLE);
+            });
         });
     }
 

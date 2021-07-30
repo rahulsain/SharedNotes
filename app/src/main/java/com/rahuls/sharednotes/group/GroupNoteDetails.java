@@ -44,6 +44,7 @@ public class GroupNoteDetails extends AppCompatActivity {
             intent.putExtra("content",data.getStringExtra("content"));
             intent.putExtra("noteId",data.getStringExtra("noteId"));
             intent.putExtra("groupId",data.getStringExtra("groupId"));
+            intent.putExtra("UserName",data.getStringExtra("UserName"));
             startActivity(intent);
         });
     }

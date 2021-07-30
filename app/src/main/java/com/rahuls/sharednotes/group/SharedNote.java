@@ -52,7 +52,7 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     NavigationView nav_view;
     RecyclerView noteLists;
     FirebaseFirestore fStore;
-    FirestoreRecyclerAdapter<Note,NoteViewHolder> noteAdapter;
+    FirestoreRecyclerAdapter<Note, NoteViewHolder> noteAdapter;
     FirebaseUser user;
     FirebaseAuth fAuth;
     Group group;
@@ -75,12 +75,12 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
 
 
         Query query = fStore.collection("groups").document(group.getGroupId())
-                .collection("ourNotes").orderBy("title",Query.Direction.DESCENDING);
+                .collection("ourNotes").orderBy("title", Query.Direction.DESCENDING);
 
-        //query notes > gid > ournotes
+        //query notes > gid > ourNotes
 
         FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
-                .setQuery(query,Note.class).build();
+                .setQuery(query, Note.class).build();
 
         noteAdapter = new FirestoreRecyclerAdapter<Note, NoteViewHolder>(allNotes) {
             @Override
@@ -88,29 +88,31 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                 holder.noteTitle.setText(model.getTitle());
                 holder.noteContent.setText(model.getContent());
                 final int colorCode = getRandomColor();
-                holder.mCardView.setBackgroundColor(holder.view.getResources().getColor(colorCode,null));
+                holder.mCardView.setBackgroundColor(holder.view.getResources().getColor(colorCode, null));
                 final String docId = noteAdapter.getSnapshots().getSnapshot(position).getId();
 
                 holder.view.setOnClickListener(view -> {
                     Intent intent = new Intent(view.getContext(), GroupNoteDetails.class);
-                    intent.putExtra("title",model.getTitle());
-                    intent.putExtra("content",model.getContent());
-                    intent.putExtra("code",colorCode);
-                    intent.putExtra("noteId",docId);
-                    intent.putExtra("groupId",group.getGroupId());
+                    intent.putExtra("title", model.getTitle());
+                    intent.putExtra("content", model.getContent());
+                    intent.putExtra("code", colorCode);
+                    intent.putExtra("noteId", docId);
+                    intent.putExtra("groupId", group.getGroupId());
+                    intent.putExtra("UserName",getIntent().getStringExtra("UserName"));
                     view.getContext().startActivity(intent);
                 });
                 ImageView menuIcon = holder.view.findViewById(R.id.menuIcon);
                 menuIcon.setOnClickListener(v -> {
                     final String docId1 = noteAdapter.getSnapshots().getSnapshot(position).getId();
-                    PopupMenu menu = new PopupMenu(v.getContext(),v);
+                    PopupMenu menu = new PopupMenu(v.getContext(), v);
                     menu.setGravity(Gravity.END);
                     menu.getMenu().add("Edit").setOnMenuItemClickListener(item -> {
                         Intent intent = new Intent(v.getContext(), EditGroupNote.class);
-                        intent.putExtra("title",model.getTitle());
-                        intent.putExtra("content",model.getContent());
+                        intent.putExtra("title", model.getTitle());
+                        intent.putExtra("content", model.getContent());
                         intent.putExtra("noteId", docId1);
-                        intent.putExtra("groupId",group.getGroupId());
+                        intent.putExtra("groupId", group.getGroupId());
+                        intent.putExtra("UserName",getIntent().getStringExtra("UserName"));
                         startActivity(intent);
                         return false;
                     });
@@ -130,7 +132,7 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
             @NonNull
             @Override
             public NoteViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_view_layout,parent,false);
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_view_layout, parent, false);
                 return new NoteViewHolder(view);
             }
         };
@@ -140,24 +142,25 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
         drawerLayout = findViewById(R.id.drawer2);
         nav_view = findViewById(R.id.nav_view2);
         nav_view.setNavigationItemSelectedListener(this);
-        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open , R.string.close);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open, R.string.close);
         drawerLayout.addDrawerListener(toggle);
         toggle.setDrawerIndicatorEnabled(true);
         toggle.syncState();
 
-        noteLists.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        noteLists.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
         noteLists.setAdapter(noteAdapter);
 
         View headerView = nav_view.getHeaderView(0);
         TextView userName = headerView.findViewById(R.id.userDisplayName);
         TextView userEmail = headerView.findViewById(R.id.userDisplayEmail);
+        nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes");
 
-        if(user.isAnonymous()){
+        if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
             userName.setText(R.string.temp_user);
         } else {
+            userName.setText(getIntent().getStringExtra("UserName"));
             userEmail.setText(user.getEmail());
-            userName.setText(user.getDisplayName());
         }
 
         FloatingActionButton fab = findViewById(R.id.addNoteFloat);
@@ -165,7 +168,7 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
             Intent intent = new Intent(v.getContext(), AddGroupNote.class);
             intent.putExtra("groupId", group.getGroupId());
             startActivity(intent);
-            overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
         });
 
     }
@@ -173,23 +176,23 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.groups:
                 startActivity(new Intent(this, MainActivity.class));
-                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 break;
 
             case R.id.addNote:
                 Intent intent = new Intent(this, AddGroupNote.class);
                 intent.putExtra("groupId", group.getGroupId());
                 startActivity(intent);
-                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 break;
 
             case R.id.sync:
-                if(user.isAnonymous()){
+                if (user.isAnonymous()) {
                     startActivity(new Intent(this, Login.class));
-                    overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 } else {
                     Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
                 }
@@ -200,19 +203,19 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                 break;
 
             default:
-                Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
 
     private void checkUser() {
         //if user is real or not
-        if(user.isAnonymous()){
+        if (user.isAnonymous()) {
             displayAlert();
         } else {
             FirebaseAuth.getInstance().signOut();
             startActivity(new Intent(getApplicationContext(), Splash.class));
-            overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
             finish();
         }
     }
@@ -222,16 +225,19 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                 .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
                 .setPositiveButton("Sync Note", (dialog, which) -> {
                     startActivity(new Intent(getApplicationContext(), Register.class));
-                    overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                     finish();
                 }).setNegativeButton("Logout", (dialog, which) -> {
-                    //ToDo: delete data created by the Temp User
+                    //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
 
-                    //TODO: delete the temp user
+                    DocumentReference documentReference = fStore.collection("users").document(user.getUid());
+                    documentReference.delete().addOnSuccessListener(aVoid -> Toast.makeText(SharedNote.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(SharedNote.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
+
+                    //delete the temp user
 
                     user.delete().addOnSuccessListener(aVoid -> {
-                        startActivity(new Intent(getApplicationContext(),Splash.class));
-                        overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                        startActivity(new Intent(getApplicationContext(), Splash.class));
+                        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                         finish();
                     });
                 });
@@ -241,32 +247,16 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu,menu);
+        inflater.inflate(R.menu.option_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.settings){
-            Toast.makeText(this,"Setting Menu is Clicked",Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.settings) {
+            Toast.makeText(this, "Setting Menu is Clicked", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    public static class NoteViewHolder extends RecyclerView.ViewHolder{
-
-        TextView noteTitle , noteContent;
-        View view;
-        CardView mCardView;
-
-        public NoteViewHolder(@NonNull View itemView) {
-            super(itemView);
-
-            noteTitle = itemView.findViewById(R.id.titles);
-            noteContent = itemView.findViewById(R.id.content);
-            view = itemView;
-            mCardView = itemView.findViewById(R.id.noteCard);
-        }
     }
 
     private int getRandomColor() {
@@ -296,8 +286,24 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     @Override
     protected void onStop() {
         super.onStop();
-        if(noteAdapter != null) {
+        if (noteAdapter != null) {
             noteAdapter.stopListening();
+        }
+    }
+
+    public static class NoteViewHolder extends RecyclerView.ViewHolder {
+
+        TextView noteTitle, noteContent;
+        View view;
+        CardView mCardView;
+
+        public NoteViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            noteTitle = itemView.findViewById(R.id.titles);
+            noteContent = itemView.findViewById(R.id.content);
+            view = itemView;
+            mCardView = itemView.findViewById(R.id.noteCard);
         }
     }
 }
