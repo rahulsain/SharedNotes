@@ -25,6 +25,7 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.User;
 import com.rahuls.sharednotes.ui.MainActivity;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -32,7 +33,7 @@ import java.util.regex.Pattern;
 
 public class Register extends AppCompatActivity {
 
-    public static final String TAG = "TAG";
+    public static final String TAG = "Register";
     EditText rUserName,rUserEmail,rUserPassword,rUserConfirmPassword;
     Button syncAccount;
     TextView loginActivity;
@@ -40,7 +41,6 @@ public class Register extends AppCompatActivity {
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
     private String userID;
-    User userM;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,15 +67,16 @@ public class Register extends AppCompatActivity {
         loginActivity.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),Login.class)));
 
 
-        String gUserName = rUserName.getText().toString();
-        String gUserEmail = rUserEmail.getText().toString();
-
-        userM = new User(gUserName,gUserEmail,userID);
-
         syncAccount.setOnClickListener(v -> {
-
             String gUserPassword = rUserPassword.getText().toString();
             String gUserConfirmPassword = rUserConfirmPassword.getText().toString();
+            String gUserName = rUserName.getText().toString();
+            String gUserEmail = rUserEmail.getText().toString();
+
+            User userM = new User(gUserName,gUserEmail,userID);
+
+            userM.setUserPhotoURL("");
+            userM.setUserGroups(Arrays.asList(""));
 
             if(gUserName.isEmpty() || gUserEmail.isEmpty() || gUserPassword.isEmpty() || gUserConfirmPassword.isEmpty()) {
                 Toast.makeText(Register.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -84,6 +85,10 @@ public class Register extends AppCompatActivity {
 
             if(!isValid(gUserEmail)){
                 rUserEmail.setError("Email is not valid");
+            }
+
+            if(gUserPassword.length()<6){
+                rUserPassword.setError("Password should be at least 6 character long");
             }
 
             if(!gUserPassword.equals(gUserConfirmPassword)){
@@ -101,6 +106,8 @@ public class Register extends AppCompatActivity {
                 user.put("UserName",userM.getName());
                 user.put("UserEmail",userM.getUserEmail());
                 user.put("UserId",userM.getUserId());
+//                user.put("UserPhotoURL",userM.getUserPhotoURL());
+//                user.put("UserGroups",userM.getUserGroups());
 
                 documentReference.set(user).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for "+ userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for "+ userID));
 

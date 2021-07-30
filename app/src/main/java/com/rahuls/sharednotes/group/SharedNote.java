@@ -2,6 +2,7 @@ package com.rahuls.sharednotes.group;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,6 +35,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
@@ -47,6 +49,7 @@ import java.util.List;
 import java.util.Random;
 
 public class SharedNote extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "SharedNote";
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     NavigationView nav_view;
@@ -233,7 +236,26 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                     DocumentReference documentReference = fStore.collection("users").document(user.getUid());
                     documentReference.delete().addOnSuccessListener(aVoid -> Toast.makeText(SharedNote.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(SharedNote.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
 
-                    //delete the temp user
+                    //Fixme: delete groups created by temp user [Not Working]
+
+                    Query query = fStore.collection("groups").whereEqualTo("CreatedBy",user.getUid());
+                    query.get()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        String idDelete = document.getId();
+                                        fStore.collection("groups").document(idDelete)
+                                                .delete()
+                                                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                                                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            });
+
+                    //delete the temp user from fAuth
 
                     user.delete().addOnSuccessListener(aVoid -> {
                         startActivity(new Intent(getApplicationContext(), Splash.class));

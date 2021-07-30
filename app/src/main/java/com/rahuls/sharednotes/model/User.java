@@ -1,13 +1,13 @@
 package com.rahuls.sharednotes.model;
 
-import java.util.Map;
+import java.util.List;
 
 public class User {
     private String UserName;
     private String UserEmail;
     private String UserId;
     private String UserPhotoURL;
-    private Map<String, Object> UserGroups;
+    private List<String> UserGroups;
 
     public User() {
     }
@@ -18,7 +18,7 @@ public class User {
         this.UserId = UserId;
     }
 
-    public User(String name, String UserEmail, String UserId, String UserPhotoURL, Map<String, Object> UserGroups) {
+    public User(String name, String UserEmail, String UserId, String UserPhotoURL, List<String> UserGroups) {
         this.UserName = name;
         this.UserEmail = UserEmail;
         this.UserId = UserId;
@@ -58,11 +58,11 @@ public class User {
         this.UserPhotoURL = userPhotoURL;
     }
 
-    public Map<String, Object> getUserGroups() {
+    public List<String> getUserGroups() {
         return UserGroups;
     }
 
-    public void setUserGroups(Map<String, Object> userGroups) {
+    public void setUserGroups(List<String> userGroups) {
         this.UserGroups = userGroups;
     }
 }

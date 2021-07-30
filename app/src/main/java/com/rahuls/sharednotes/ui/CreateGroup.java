@@ -2,6 +2,7 @@ package com.rahuls.sharednotes.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,9 +29,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
@@ -39,10 +43,11 @@ import com.rahuls.sharednotes.group.AddGroupNote;
 import com.rahuls.sharednotes.group.SharedNote;
 import com.rahuls.sharednotes.model.Group;
 
-import java.util.Objects;
+import java.util.List;
 
 public class CreateGroup extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final String TAG = "CreateGroup";
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     NavigationView nav_view;
@@ -52,6 +57,8 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
     FirebaseUser user;
     FirebaseAuth fAuth;
     Group group;
+    CollectionReference groupCol;
+    DocumentReference userDocRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,9 +74,39 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         final String[] UserName = {""};
 //        final String[] EmailId = {""};
 
-        Query query = fStore.collection("groups").whereArrayContains("GroupMembers", Objects.requireNonNull(user.getEmail()));
+        groupCol = fStore.collection("groups");
+        userDocRef = fStore.collection("users").document(user.getUid());
+
+        Query query = groupCol.whereArrayContains("GroupMembers", user.getEmail());
 //        Toast.makeText(getApplicationContext(),user.getEmail() + " " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
 //        Intent data = getIntent();
+
+        query.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String gID = document.getId();
+                    Log.d(TAG, gID + " => " + document.getData());
+
+                    Group group = document.toObject(Group.class);
+
+                    List<String> gMembers = group.getGroupMembers();
+
+                    //update user data
+                    if (gMembers.contains(user.getEmail())) {
+
+                        // Atomically remove a region from the "regions" array field.
+//                        userIDRef.update("UserGroups", FieldValue.arrayRemove(""));
+
+                        // Atomically add a new region to the "regions" array field.
+                        userDocRef.update("UserGroups", FieldValue.arrayUnion(gID));
+
+                        groupCol.document(gID).update("GroupMemberUId",FieldValue.arrayUnion(user.getUid()));
+                    }
+                }
+            } else {
+                Log.d(TAG, "Error getting documents: ", task.getException());
+            }
+        });
 
         FirestoreRecyclerOptions<Group> allNotes = new FirestoreRecyclerOptions.Builder<Group>()
                 .setQuery(query, Group.class).build();
@@ -117,8 +154,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
             userEmail.setVisibility(View.GONE);
             userName.setText(R.string.temp_user);
         } else {
-            DocumentReference docRef = fStore.collection("users").document(user.getUid());
-            docRef.get().addOnSuccessListener(documentSnapshot -> {
+            userDocRef.get().addOnSuccessListener(documentSnapshot -> {
                 UserName[0] = documentSnapshot.getString("UserName");
 //                EmailId[0] = documentSnapshot.getString("UserEmail");
                 userName.setText(UserName[0]);
@@ -188,9 +224,30 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                     overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                     finish();
                 }).setNegativeButton("Logout", (dialog, which) -> {
-                    //ToDo: delete data created by the Temp User
+                    //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
 
-                    //TODO: delete the temp user
+                    userDocRef.delete().addOnSuccessListener(aVoid -> Toast.makeText(CreateGroup.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(CreateGroup.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
+
+                    //delete groups created by temp user
+
+                    Query query = groupCol.whereEqualTo("CreatedBy", user.getUid());
+                    query.get()
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        String idDelete = document.getId();
+                                        Log.d(TAG, idDelete + " => " + document.getData());
+                                        groupCol.document(idDelete)
+                                                .delete()
+                                                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
+                                                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            });
+
+                    //delete the temp user from fAuth
 
                     user.delete().addOnSuccessListener(aVoid -> {
                         startActivity(new Intent(getApplicationContext(), Splash.class));

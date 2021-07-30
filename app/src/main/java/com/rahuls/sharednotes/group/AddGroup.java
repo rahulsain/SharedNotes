@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class AddGroup extends AppCompatActivity {
 
-//    private static final String TAG = "AddGroup";
+    private static final String TAG = "AddGroup";
     FirebaseFirestore fStore;
     EditText groupName, groupMember;
     ProgressBar progressBarSave;
@@ -97,7 +97,7 @@ public class AddGroup extends AppCompatActivity {
             Date currentTime = Calendar.getInstance().getTime();
             group.setCreatedAt(currentTime.toString());
 
-            //save note
+            //save group
             DocumentReference documentReference = fStore.collection("groups").document(group.getGroupId());
             Map<String, Object> groupDetails = new HashMap<>();
             groupDetails.put("GroupName", group.getGroupName());
@@ -113,6 +113,36 @@ public class AddGroup extends AppCompatActivity {
                 Toast.makeText(this, "Error, try again", Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);
             });
+
+            //update user id in groups
+
+//            Query query = fStore.collection("users").whereArrayContains("UserGroups",group.getGroupId());
+//            query.get().addOnCompleteListener(task -> {
+//                if (task.isSuccessful()) {
+//                    for (QueryDocumentSnapshot document : task.getResult()) {
+//                        String gID = document.getId();
+//                        Log.d(TAG, gID + " => " + document.getData());
+//
+//                        Group group = document.toObject(Group.class);
+//
+//                        List<String> gMembers = group.getGroupMembers();
+//
+//                        //update user data
+//                        if (gMembers.contains(user.getEmail())) {
+//                            DocumentReference userIDRef = fStore.collection("users").document(user.getUid());
+//
+//                            // Atomically remove a region from the "regions" array field.
+//                            userIDRef.update("UserGroups", FieldValue.arrayRemove(""));
+//
+//                            // Atomically add a new region to the "regions" array field.
+//                            userIDRef.update("UserGroups", FieldValue.arrayUnion(gID));
+//                        }
+//                    }
+//                } else {
+//                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                }
+//            });
+
         });
 
 //        RecyclerView memberList = findViewById(R.id.memberList);

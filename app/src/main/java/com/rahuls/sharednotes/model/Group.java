@@ -8,16 +8,18 @@ public class Group {
     private String CreatedAt;
     private String GroupId;
     private List<String> GroupMembers;
+    private List<String> GroupMemberUId;
 
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, String createdAt, String groupId, List<String> groupMembers) {
+    public Group(String groupName, String createdBy, String createdAt, String groupId, List<String> groupMembers, List<String> groupMemberUId) {
         GroupName = groupName;
         CreatedBy = createdBy;
         CreatedAt = createdAt;
         GroupId = groupId;
         GroupMembers = groupMembers;
+        GroupMemberUId = groupMemberUId;
     }
 
     public String getGroupName() {
@@ -59,5 +61,9 @@ public class Group {
     public void setGroupMembers(List<String> groupMembers) {
         GroupMembers = groupMembers;
     }
+
+    public List<String> getGroupMemberUId() { return GroupMemberUId; }
+
+    public void setGroupMemberUId(List<String> groupMemberUId) { GroupMemberUId = groupMemberUId; }
 
 }
