@@ -18,6 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 
@@ -70,6 +71,8 @@ public class AddGroupNote extends AppCompatActivity {
             Map<String,Object> note = new HashMap<>();
             note.put("title",nTitle);
             note.put("content",nContent);
+            note.put("createdOn", FieldValue.serverTimestamp());
+            note.put("createdBy", user.getUid());
 
             documentReference.set(note).addOnSuccessListener(aVoid -> {
                 Toast.makeText(AddGroupNote.this, "Note added", Toast.LENGTH_SHORT).show();

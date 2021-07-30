@@ -1,11 +1,15 @@
 package com.rahuls.sharednotes.model;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.ServerTimestamp;
+
 import java.util.List;
 
 public class Group {
     private String GroupName;
     private String CreatedBy;
-    private String CreatedAt;
+    @ServerTimestamp
+    private Timestamp CreatedAt;
     private String GroupId;
     private List<String> GroupMembers;
     private List<String> GroupMemberUId;
@@ -13,7 +17,7 @@ public class Group {
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, String createdAt, String groupId, List<String> groupMembers, List<String> groupMemberUId) {
+    public Group(String groupName, String createdBy, Timestamp createdAt, String groupId, List<String> groupMembers, List<String> groupMemberUId) {
         GroupName = groupName;
         CreatedBy = createdBy;
         CreatedAt = createdAt;
@@ -38,11 +42,11 @@ public class Group {
         CreatedBy = createdBy;
     }
 
-    public String getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return CreatedAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         CreatedAt = createdAt;
     }
 

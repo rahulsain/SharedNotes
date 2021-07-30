@@ -1,9 +1,14 @@
 package com.rahuls.sharednotes.model;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.ServerTimestamp;
+
 public class Note {
     private String title;
     private String content;
-    private String createdOn;
+    @ServerTimestamp
+    private Timestamp createdOn;
+    private String createdBy;
 
     public Note() {
     }
@@ -11,6 +16,13 @@ public class Note {
     public Note(String title, String content) {
         this.title = title;
         this.content = content;
+    }
+
+    public Note(String title, String content,Timestamp createdOn,String createdBy) {
+        this.title = title;
+        this.content = content;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
     }
 
     public String getTitle() {
@@ -29,11 +41,15 @@ public class Note {
         this.content = content;
     }
 
-    public String getCreatedOn() {
+    public Timestamp getCreatedOn() {
         return createdOn;
     }
 
-    public void setCreatedOn(String createdOn) {
+    public void setCreatedOn(Timestamp createdOn) {
         this.createdOn = createdOn;
     }
+
+    public String getCreatedBy() { return createdBy; }
+
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
 }

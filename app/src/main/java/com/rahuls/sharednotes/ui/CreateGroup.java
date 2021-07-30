@@ -97,9 +97,10 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                         // Atomically remove a region from the "regions" array field.
 //                        userIDRef.update("UserGroups", FieldValue.arrayRemove(""));
 
-                        // Atomically add a new region to the "regions" array field.
+                        // Atomically add a new groupID to the "UserGroups" array field.
                         userDocRef.update("UserGroups", FieldValue.arrayUnion(gID));
 
+                        // Atomically add a new userID to the "GroupMemberUId" array field.
                         groupCol.document(gID).update("GroupMemberUId",FieldValue.arrayUnion(user.getUid()));
                     }
                 }

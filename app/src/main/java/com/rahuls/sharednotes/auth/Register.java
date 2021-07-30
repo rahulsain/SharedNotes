@@ -40,7 +40,6 @@ public class Register extends AppCompatActivity {
     ProgressBar progressBar;
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
-    private String userID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +61,7 @@ public class Register extends AppCompatActivity {
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
-        userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
+
 
         loginActivity.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),Login.class)));
 
@@ -72,6 +71,8 @@ public class Register extends AppCompatActivity {
             String gUserConfirmPassword = rUserConfirmPassword.getText().toString();
             String gUserName = rUserName.getText().toString();
             String gUserEmail = rUserEmail.getText().toString();
+
+            String userID = Objects.requireNonNull(fAuth.getCurrentUser()).getUid();
 
             User userM = new User(gUserName,gUserEmail,userID);
 

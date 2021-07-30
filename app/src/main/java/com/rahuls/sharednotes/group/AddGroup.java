@@ -17,13 +17,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.Group;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,15 +93,15 @@ public class AddGroup extends AppCompatActivity {
             group.setGroupId(UUID.randomUUID().toString());
             group.setCreatedBy(user.getUid());
 
-            Date currentTime = Calendar.getInstance().getTime();
-            group.setCreatedAt(currentTime.toString());
+//            Date currentTime = Calendar.getInstance().getTime();
+//            group.setCreatedAt(currentTime.toString());
 
             //save group
             DocumentReference documentReference = fStore.collection("groups").document(group.getGroupId());
             Map<String, Object> groupDetails = new HashMap<>();
             groupDetails.put("GroupName", group.getGroupName());
             groupDetails.put("CreatedBy", group.getCreatedBy());
-            groupDetails.put("CreatedAt", group.getCreatedAt());
+            groupDetails.put("CreatedAt", FieldValue.serverTimestamp());
             groupDetails.put("GroupId", group.getGroupId());
             groupDetails.put("GroupMembers", group.getGroupMembers());
 
