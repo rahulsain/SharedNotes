@@ -102,6 +102,8 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                     intent.putExtra("noteId", docId);
                     intent.putExtra("groupId", group.getGroupId());
                     intent.putExtra("UserName",getIntent().getStringExtra("UserName"));
+                    intent.putExtra("UserId",user.getUid());
+                    intent.putExtra("createdBy",model.getCreatedBy());
                     view.getContext().startActivity(intent);
                 });
                 ImageView menuIcon = holder.view.findViewById(R.id.menuIcon);
@@ -110,6 +112,10 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                     PopupMenu menu = new PopupMenu(v.getContext(), v);
                     menu.setGravity(Gravity.END);
                     menu.getMenu().add("Edit").setOnMenuItemClickListener(item -> {
+                        if(!user.getUid().equals(model.getCreatedBy())){
+                            Toast.makeText(getApplicationContext(),"You are not the author, you can't edit",Toast.LENGTH_SHORT).show();
+                            return false;
+                        }
                         Intent intent = new Intent(v.getContext(), EditGroupNote.class);
                         intent.putExtra("title", model.getTitle());
                         intent.putExtra("content", model.getContent());
@@ -120,6 +126,10 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                         return false;
                     });
                     menu.getMenu().add("Delete").setOnMenuItemClickListener(item -> {
+                        if(!user.getUid().equals(model.getCreatedBy())){
+                            Toast.makeText(getApplicationContext(),"You are not the author, you can't delete",Toast.LENGTH_SHORT).show();
+                            return false;
+                        }
                         DocumentReference documentReference = fStore.collection("groups").document(group.getGroupId())
                                 .collection("ourNotes").document(docId1);
                         documentReference.delete().addOnSuccessListener(aVoid -> {

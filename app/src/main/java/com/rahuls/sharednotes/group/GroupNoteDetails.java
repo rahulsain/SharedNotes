@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,15 +34,24 @@ public class GroupNoteDetails extends AppCompatActivity {
         TextView title = findViewById(R.id.noteDetailsTitle);
         content.setMovementMethod(new ScrollingMovementMethod());
 
-        content.setText(data.getStringExtra("content"));
-        title.setText(data.getStringExtra("title"));
+        String contentS = data.getStringExtra("content");
+        String titleS = data.getStringExtra("title");
+        String userId = data.getStringExtra("UserId");
+        String createdBy = data.getStringExtra("createdBy");
+
+        content.setText(contentS);
+        title.setText(titleS);
         content.setBackgroundColor(getResources().getColor(data.getIntExtra("code",0),null));
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(view -> {
+            if(!userId.equals(createdBy)){
+                Toast.makeText(view.getContext(),"You are not the author, you can't edit",Toast.LENGTH_SHORT).show();
+                return;
+            }
             Intent intent = new Intent(view.getContext(), EditGroupNote.class);
-            intent.putExtra("title",data.getStringExtra("title"));
-            intent.putExtra("content",data.getStringExtra("content"));
+            intent.putExtra("title",titleS);
+            intent.putExtra("content",contentS);
             intent.putExtra("noteId",data.getStringExtra("noteId"));
             intent.putExtra("groupId",data.getStringExtra("groupId"));
             intent.putExtra("UserName",data.getStringExtra("UserName"));
