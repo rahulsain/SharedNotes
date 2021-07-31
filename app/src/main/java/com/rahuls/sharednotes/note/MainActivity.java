@@ -1,4 +1,4 @@
-package com.rahuls.sharednotes.ui;
+package com.rahuls.sharednotes.note;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -37,10 +37,10 @@ import com.google.firebase.firestore.Query;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
+import com.rahuls.sharednotes.group.CreateGroup;
 import com.rahuls.sharednotes.model.Note;
-import com.rahuls.sharednotes.note.AddNote;
-import com.rahuls.sharednotes.note.EditNote;
-import com.rahuls.sharednotes.note.NoteDetails;
+import com.rahuls.sharednotes.ui.Splash;
+import com.rahuls.sharednotes.ui.UserProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirestoreRecyclerAdapter<Note, NoteViewHolder> noteAdapter;
     FirebaseUser user;
     FirebaseAuth fAuth;
+    TextView userName;
+    TextView userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +142,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         noteLists.setAdapter(noteAdapter);
 
         View headerView = nav_view.getHeaderView(0);
-        TextView userName = headerView.findViewById(R.id.userDisplayName);
-        TextView userEmail = headerView.findViewById(R.id.userDisplayEmail);
+        userName = headerView.findViewById(R.id.userDisplayName);
+        userEmail = headerView.findViewById(R.id.userDisplayEmail);
 
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
@@ -244,7 +246,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings) {
-            Toast.makeText(this, "Setting Menu is Clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
+        } else if (item.getItemId() == R.id.userProfile) {
+            Intent intent = new Intent(this, UserProfile.class);
+            intent.putExtra("userName", userName.getText().toString());
+            intent.putExtra("userEmail", userEmail.getText().toString());
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

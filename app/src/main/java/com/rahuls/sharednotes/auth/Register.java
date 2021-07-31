@@ -23,7 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.User;
-import com.rahuls.sharednotes.ui.MainActivity;
+import com.rahuls.sharednotes.note.MainActivity;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ public class Register extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
-        Objects.requireNonNull(getSupportActionBar()).setTitle("Connect to SharedNotes");
+        Objects.requireNonNull(getSupportActionBar()).setTitle("Connect to Shared Notes");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         fAuth = FirebaseAuth.getInstance();

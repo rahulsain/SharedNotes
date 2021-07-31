@@ -41,8 +41,9 @@ import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
 import com.rahuls.sharednotes.model.Note;
-import com.rahuls.sharednotes.ui.MainActivity;
+import com.rahuls.sharednotes.note.MainActivity;
 import com.rahuls.sharednotes.ui.Splash;
+import com.rahuls.sharednotes.ui.UserProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,8 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     FirebaseUser user;
     FirebaseAuth fAuth;
     Group group;
+    TextView userName;
+    TextView userEmail;
 
 
     @Override
@@ -164,8 +167,8 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
         noteLists.setAdapter(noteAdapter);
 
         View headerView = nav_view.getHeaderView(0);
-        TextView userName = headerView.findViewById(R.id.userDisplayName);
-        TextView userEmail = headerView.findViewById(R.id.userDisplayEmail);
+        userName = headerView.findViewById(R.id.userDisplayName);
+        userEmail = headerView.findViewById(R.id.userDisplayEmail);
         nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes");
 
         if (user.isAnonymous()) {
@@ -286,7 +289,12 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings) {
-            Toast.makeText(this, "Setting Menu is Clicked", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
+        } else if (item.getItemId() == R.id.userProfile) {
+            Intent intent = new Intent(this, UserProfile.class);
+            intent.putExtra("userName", userName.getText().toString());
+            intent.putExtra("userEmail", userEmail.getText().toString());
+            startActivity(intent);
         }
         return super.onOptionsItemSelected(item);
     }

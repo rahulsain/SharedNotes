@@ -2,20 +2,41 @@
     <string name="app_name">Shared Notes</string>
     <string name="open">open</string>
     <string name="close">close</string>
-    <string name="title_activity_note_details">NoteDetails</string>
-    <string name="title_activity_add_note">AddNote</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
+    <string name="title_activity_note_details">Note Details</string>
+    <string name="title_activity_add_note">Add Note</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
-    <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="temp_user">Temporary User</string>
-    <string name="title_activity_create_group">CreateGroup</string>
-    <string name="group_members_add_their_email_id">Group Members - Add their Email ID</string>
+    <string name="title_activity_create_group">Groups</string>
+    <string name="title_activity_shared_note">Group Notes</string>
+    <string name="title_activity_user_profile">User Profile</string>
+    <string name="title_activity_edit_profile">Edit Profile</string>
+    <string name="title_activity_main">Personal Notes</string>
+    <string name="group_members_add_their_email_id">Group Members - Add their Email ID \n(Case Sensitive)</string>
     <string name="add_button">Add Button</string>
     <string name="group_name">Group Name</string>
     <string name="save_button">Save Button</string>
+    <string name="user_profile">User Profile</string>
+    <string name="settings">Settings</string>
+    <string name="shared_notes">Shared Notes</string>
+    <string name="share_your_notebook_with_your_team">Share Your Notebook With Your Team</string>
+    <string name="rahul_sain">Rahul Sain</string>
+    <string name="rahul1champ_gmail_com">rahul1champ@gmail.com</string>
+    <string name="user_name">User Name</string>
+    <string name="user_profile_image">User Profile Image</string>
+    <string name="your_email_address">Your Email Address</string>
+    <string name="phone">Phone</string>
+    <string name="save">Save</string>
+    <string name="your_display_name">Your Display Name</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="email_not_verified">Email Not Verified!</string>
+    <string name="verify_now">Verify Now</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="email">Email</string>
+    <string name="user_icon">User Icon</string>
+    <string name="mail_icon">Mail Icon</string>
+    <string name="phone_icon">Phone Icon</string>
+    <string name="change_profile">Change Profile</string>
+
 </resources>

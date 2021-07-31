@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.rahuls.sharednotes.R;
+import com.rahuls.sharednotes.note.MainActivity;
 
 public class Splash extends AppCompatActivity {
 
@@ -27,7 +28,7 @@ public class Splash extends AppCompatActivity {
             //check if the user is logged in
 
             if(fAuth.getCurrentUser() != null){
-                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
             } else {
                 //new anonymous account

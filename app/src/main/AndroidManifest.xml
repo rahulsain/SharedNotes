@@ -3,6 +3,18 @@
     package="com.rahuls.sharednotes">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        android:required="false" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -12,15 +24,24 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".ui.EditProfile"
+            android:label="@string/title_activity_edit_profile"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ui.UserProfile"
+            android:label="@string/title_activity_user_profile"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".group.AddGroup"
             android:label="@string/title_activity_add_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.CreateGroup"
+            android:name=".group.CreateGroup"
             android:label="@string/title_activity_create_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".group.SharedNote"
+            android:label="@string/title_activity_shared_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.Splash"
@@ -55,12 +76,23 @@
             android:name=".group.GroupNoteDetails"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.MainActivity"
+            android:name=".note.MainActivity"
+            android:label="@string/title_activity_main"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.rahuls.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

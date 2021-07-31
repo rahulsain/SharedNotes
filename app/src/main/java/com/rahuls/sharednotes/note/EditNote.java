@@ -17,7 +17,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
-import com.rahuls.sharednotes.ui.MainActivity;
 
 import java.util.HashMap;
 import java.util.Map;

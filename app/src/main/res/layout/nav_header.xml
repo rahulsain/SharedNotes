@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
      android:layout_height="match_parent"
     android:orientation="vertical">
+
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="200dp"
@@ -19,7 +20,7 @@
         android:layout_marginEnd="24dp"
         android:fontFamily="@font/abril_fatface"
         android:lineSpacingExtra="8sp"
-        android:text="Shared Notes"
+        android:text="@string/shared_notes"
         android:textAlignment="viewStart"
         android:textColor="#FFFFFF"
         android:textSize="36sp"
@@ -38,7 +39,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="8dp"
         android:fontFamily="@font/abril_fatface"
-        android:text="Share Your Notebook With Your Team "
+        android:text="@string/share_your_notebook_with_your_team"
         android:textAlignment="viewStart"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
@@ -54,12 +55,13 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="48dp"
         android:layout_marginEnd="16dp"
-        android:text="Bikash Thapa"
-        android:textColor="#FFAB40"
+        android:text="@string/rahul_sain"
+        android:textColor="#FFFFFF"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintBottom_toTopOf="@id/userDisplayEmail"/>
 
     <TextView
         android:id="@+id/userDisplayEmail"
@@ -67,11 +69,13 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="thapabikash48@gmail.com"
-        android:textColor="#FFAB40"
+        android:layout_marginBottom="16dp"
+        android:text="@string/rahul1champ_gmail_com"
+        android:textColor="#FFFFFF"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/userDisplayName" />
+        app:layout_constraintTop_toBottomOf="@+id/userDisplayName"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
