@@ -9,6 +9,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,6 +81,12 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         groupCol = fStore.collection("groups");
         userDocRef = fStore.collection("users").document(user.getUid());
 
+        userDocRef.get().addOnSuccessListener(documentSnapshot -> {
+            UserName[0] = documentSnapshot.getString("UserName");
+//                EmailId[0] = documentSnapshot.getString("UserEmail");
+            userName.setText(UserName[0]);
+        });
+
 
         Query query = groupCol.whereArrayContains("GroupMembers", user.getEmail());
 //        Toast.makeText(getApplicationContext(),user.getEmail() + " " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
@@ -105,7 +112,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                         userDocRef.update("UserGroups", FieldValue.arrayUnion(gID));
 
                         // Atomically add a new userID to the "GroupMemberUId" array field.
-                        groupCol.document(gID).update("GroupMemberUId",FieldValue.arrayUnion(user.getUid()));
+                        groupCol.document(gID).update("GroupMemberUId", FieldValue.arrayUnion(user.getUid()));
                     }
                 }
             } else {
@@ -123,9 +130,24 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                 final String groupId = groupAdapter.getSnapshots().getSnapshot(position).getId();
 
                 holder.view.setOnClickListener(view -> {
-                    Intent intent = new Intent(CreateGroup.this, SharedNote.class).putExtra("groupId", groupId);
+                    Intent intent = new Intent(view.getContext(), SharedNote.class).putExtra("groupId", groupId);
                     intent.putExtra("UserName", UserName[0]);
                     startActivity(intent);
+                });
+
+                holder.groupInfo.setOnClickListener(view -> {
+                    AlertDialog.Builder warning = new AlertDialog.Builder(view.getContext()).setTitle("What Operation You Want to Perform")
+                            .setMessage("If You are admin, you can only add or remove members. Else you can leave the group on your behalf.")
+                            .setNegativeButton("Add/ Remove Members", (dialog, which) -> {
+
+                                startActivity(new Intent(view.getContext(), AddGroup.class));
+
+                            }).setPositiveButton("Leave Group", (dialog, which) -> {
+                                userDocRef.update("UserGroups", FieldValue.arrayRemove(groupId));
+                                groupCol.document(groupId).update("GroupMembers", FieldValue.arrayRemove(user.getEmail()));
+                                groupCol.document(groupId).update("GroupMemberUId", FieldValue.arrayRemove(user.getUid()));
+                            });
+                    warning.show();
                 });
             }
 
@@ -158,16 +180,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
             userName.setText(R.string.temp_user);
-        } else {
-            userDocRef.get().addOnSuccessListener(documentSnapshot -> {
-                UserName[0] = documentSnapshot.getString("UserName");
-//                EmailId[0] = documentSnapshot.getString("UserEmail");
-                userName.setText(UserName[0]);
-            });
-
-            userEmail.setText(user.getEmail());
-
-        }
+        } else { userEmail.setText(user.getEmail()); }
 
         FloatingActionButton fab = findViewById(R.id.addGroupFloat);
         fab.setOnClickListener(view ->
@@ -244,7 +257,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings) {
-            Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         } else if (item.getItemId() == R.id.userProfile) {
             Intent intent = new Intent(this, UserProfile.class);
             intent.putExtra("userName", userName.getText().toString());
@@ -273,6 +286,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         TextView groupName;
         View view;
         CardView mCardView;
+        ImageView groupInfo;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -280,6 +294,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
             groupName = itemView.findViewById(R.id.groupName);
             view = itemView;
             mCardView = itemView.findViewById(R.id.groupCard);
+            groupInfo = itemView.findViewById(R.id.groupInfo);
         }
     }
 }

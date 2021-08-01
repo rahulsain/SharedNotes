@@ -1,5 +1,6 @@
 package com.rahuls.sharednotes.group;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -107,7 +108,7 @@ public class AddGroup extends AppCompatActivity {
 
             documentReference.set(groupDetails).addOnSuccessListener(aVoid -> {
                 Toast.makeText(this, "Group Created", Toast.LENGTH_SHORT).show();
-                onBackPressed();
+                startActivity(new Intent(this,CreateGroup.class));
             }).addOnFailureListener(e -> {
                 Toast.makeText(this, "Error, try again", Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);

@@ -46,4 +46,5 @@
     <string name="share_app">Share App</string>
     <string name="logout">Logout</string>
     <string name="delete_profile">Delete Profile</string>
+    <string name="group_info">Group Info</string>
 </resources>

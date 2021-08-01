@@ -111,7 +111,7 @@ public class Register extends AppCompatActivity {
 
                 DocumentReference documentReference = fStore.collection("users").document(userID);
                 Map<String,Object> userD = new HashMap<>();
-                userD.put("UserName",userM.getName());
+                userD.put("UserName",userM.getUserName());
                 userD.put("UserEmail",userM.getUserEmail());
                 userD.put("UserId",userM.getUserId());
 //                user.put("UserPhotoURL",userM.getUserPhotoURL());
