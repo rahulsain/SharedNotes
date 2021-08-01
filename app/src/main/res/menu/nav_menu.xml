@@ -1,40 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="General">
+    <item android:title="@string/general">
         <menu>
             <item
                 android:id="@+id/groups"
-                android:icon="@drawable/ic_event_note_black_24dp"
-                android:title="Groups" />
+                android:icon="@drawable/ic_baseline_person_24"
+                android:title="@string/groups" />
             <item
                 android:id="@+id/addNote"
                 android:icon="@drawable/ic_add_circle_black_24dp"
-                android:title="Add Note" />
+                android:title="@string/add_note" />
             <item
                 android:id="@+id/sync"
                 android:icon="@drawable/ic_sync_black_24dp"
-                android:title="Sync Notes" />
+                android:title="@string/sync_notes" />
         </menu>
     </item>
-    <item android:title="Support">
+    <item android:title="@string/support">
         <menu>
             <item
                 android:id="@+id/rating"
                 android:icon="@drawable/ic_star_half_black_24dp"
-                android:title="Rate App" />
+                android:title="@string/rate_app" />
 
             <item
                 android:id="@+id/shareapp"
                 android:icon="@drawable/ic_share_black_24dp"
-                android:title="Share App" />
+                android:title="@string/share_app" />
         </menu>
     </item>
-    <item android:title="Logout">
+    <item android:title="@string/logout">
         <menu>
             <item
                 android:id="@+id/logout"
                 android:icon="@drawable/ic_vpn_key_black_24dp"
-                android:title="Logout" />
+                android:title="@string/logout" />
         </menu>
     </item>
 

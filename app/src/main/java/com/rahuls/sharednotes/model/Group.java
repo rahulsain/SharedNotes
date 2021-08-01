@@ -1,23 +1,29 @@
 package com.rahuls.sharednotes.model;
 
-import java.util.Map;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.ServerTimestamp;
+
+import java.util.List;
 
 public class Group {
     private String GroupName;
     private String CreatedBy;
-    private String CreatedAt;
+    @ServerTimestamp
+    private Timestamp CreatedAt;
     private String GroupId;
-    private Map<String, String> GroupMembers;
+    private List<String> GroupMembers;
+    private List<String> GroupMemberUId;
 
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, String createdAt, String groupId, Map<String, String> groupMembers) {
+    public Group(String groupName, String createdBy, Timestamp createdAt, String groupId, List<String> groupMembers, List<String> groupMemberUId) {
         GroupName = groupName;
         CreatedBy = createdBy;
         CreatedAt = createdAt;
         GroupId = groupId;
         GroupMembers = groupMembers;
+        GroupMemberUId = groupMemberUId;
     }
 
     public String getGroupName() {
@@ -36,11 +42,11 @@ public class Group {
         CreatedBy = createdBy;
     }
 
-    public String getCreatedAt() {
+    public Timestamp getCreatedAt() {
         return CreatedAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Timestamp createdAt) {
         CreatedAt = createdAt;
     }
 
@@ -52,12 +58,16 @@ public class Group {
         GroupId = groupId;
     }
 
-    public Map<String, String> getGroupMembers() {
+    public List<String> getGroupMembers() {
         return GroupMembers;
     }
 
-    public void setGroupMembers(Map<String, String> groupMembers) {
+    public void setGroupMembers(List<String> groupMembers) {
         GroupMembers = groupMembers;
     }
+
+    public List<String> getGroupMemberUId() { return GroupMemberUId; }
+
+    public void setGroupMemberUId(List<String> groupMemberUId) { GroupMemberUId = groupMemberUId; }
 
 }

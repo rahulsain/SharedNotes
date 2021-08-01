@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.rahuls.sharednotes.R;
+import com.rahuls.sharednotes.note.MainActivity;
 
 public class Splash extends AppCompatActivity {
 
@@ -27,21 +28,21 @@ public class Splash extends AppCompatActivity {
             //check if the user is logged in
 
             if(fAuth.getCurrentUser() != null){
-                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                startActivity(new Intent(this, MainActivity.class));
                 finish();
             } else {
                 //new anonymous account
                 fAuth.signInAnonymously().addOnSuccessListener(authResult -> {
-                    Toast.makeText(Splash.this, "Logged In with Temp Account", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                    Toast.makeText(this, "Logged In with Temp Account", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(this,MainActivity.class));
                     finish();
                 }).addOnFailureListener(e -> {
-                    Toast.makeText(Splash.this, "Error! " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error! " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     finish();
                 });
             }
 
 
-        }, 100);
+        }, 10);
     }
 }

@@ -14,6 +14,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 
@@ -68,11 +69,13 @@ public class EditGroupNote extends AppCompatActivity {
             Map<String,Object> note = new HashMap<>();
             note.put("title",nTitle);
             note.put("content",nContent);
+            note.put("createdOn", FieldValue.serverTimestamp());
 
             documentReference.update(note).addOnSuccessListener(aVoid -> {
                 Toast.makeText(EditGroupNote.this, "Note saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), SharedNote.class);
                 intent.putExtra("groupId",data.getStringExtra("groupId"));
+                intent.putExtra("UserName",data.getStringExtra("UserName"));
                 startActivity(intent);
             }).addOnFailureListener(e -> {
                 Toast.makeText(EditGroupNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
