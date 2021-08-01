@@ -2,7 +2,7 @@ package com.rahuls.sharednotes.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,9 +15,13 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.note.MainActivity;
+import com.rahuls.sharednotes.ui.Splash;
 
 import java.util.Objects;
 
@@ -68,32 +72,32 @@ public class Login extends AppCompatActivity {
 
             spinner.setVisibility(View.VISIBLE);
 
-            if (Objects.requireNonNull(fAuth.getCurrentUser()).isAnonymous()) {
-                FirebaseUser user = fAuth.getCurrentUser();
-
-                fStore.collection("users").document(user.getUid()).delete();
-
-                //delete Temp user
-
-                user.delete().addOnSuccessListener(aVoid -> Toast.makeText(Login.this, "Temp User and its Data Deleted.", Toast.LENGTH_SHORT).show());
+            if (user.isAnonymous()) {
+                deleteTempDataBase();
             }
             fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
                 Toast.makeText(Login.this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+
+                Intent i = new Intent(this, MainActivity.class);
+//              set the new task and clear flags
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+
             }).addOnFailureListener(e -> {
-                Toast.makeText(Login.this, "Login Failed: " + e.getMessage() + " Closing the App Now. Restart the App!", Toast.LENGTH_LONG).show();
+                Toast.makeText(Login.this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
 //                    Log.w(TAG, "Login Failed! " + e.getMessage() + e.getCause());
                 spinner.setVisibility(View.GONE);
+                startActivity(new Intent(this, Splash.class));
 
                 //fore - close the app
 
-                final Handler handler = new Handler();
-                handler.postDelayed(() -> {
-                    // Do something after 5s = 5000ms
-                    moveTaskToBack(true);
-                    android.os.Process.killProcess(android.os.Process.myPid());
-                    System.exit(1);
-                }, 7000);
+//                final Handler handler = new Handler();
+//                handler.postDelayed(() -> {
+//                    // Do something after 5s = 5000ms
+//                    moveTaskToBack(true);
+//                    android.os.Process.killProcess(android.os.Process.myPid());
+//                    System.exit(1);
+//                }, 7000);
 
             });
 
@@ -102,6 +106,56 @@ public class Login extends AppCompatActivity {
 
         createAccount.setOnClickListener(v -> startActivity(new Intent(this, Register.class)));
         forgetPassword.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+    }
+
+    private void deleteTempDataBase() {
+        String userID = user.getUid();
+
+        //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
+
+        DocumentReference documentReference = fStore.collection("users").document(userID);
+
+        Query queryN = documentReference.collection("myNotes");
+
+        queryN.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : task.getResult()) {
+                    String idDelete = document.getId();
+                    Log.d(TAG, idDelete + " => " + document.getData());
+                    documentReference.collection("myNotes").document(idDelete)
+                            .delete()
+                            .addOnSuccessListener(aVoid -> Log.d(TAG, "Notes created by User are successfully deleted!"))
+                            .addOnFailureListener(e -> Log.w(TAG, "Error deleting user notes", e));
+                }
+            } else {
+                Log.d(TAG, "Error getting documents for notes: ", task.getException());
+            }
+        });
+
+        documentReference.delete().addOnSuccessListener(aVoid -> Toast.makeText(this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(this, "Error in deleting User", Toast.LENGTH_SHORT).show());
+
+        //Fixme: delete groups created by temp user [Partially Working]
+
+        Query queryG = fStore.collection("groups").whereEqualTo("CreatedBy", userID);
+        queryG.get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String idDelete = document.getId();
+                            Log.d(TAG, idDelete + " => " + document.getData());
+                            fStore.collection("groups").document(idDelete)
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Group created by user successfully deleted!"))
+                                    .addOnFailureListener(e -> Log.w(TAG, "Error deleting group", e));
+                        }
+                    } else {
+                        Log.d(TAG, "Error getting documents for groups: ", task.getException());
+                    }
+                });
+
+        //delete the temp user from fAuth
+
+        user.delete().addOnSuccessListener(aVoid -> Toast.makeText(this, "Temp User and its Data Deleted.", Toast.LENGTH_SHORT).show());
     }
 
     private void showWarning() {

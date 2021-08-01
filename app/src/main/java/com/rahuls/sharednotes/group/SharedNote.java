@@ -2,7 +2,6 @@ package com.rahuls.sharednotes.group;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -35,9 +34,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
+import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
 import com.rahuls.sharednotes.model.Note;
@@ -169,7 +168,8 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
         View headerView = nav_view.getHeaderView(0);
         userName = headerView.findViewById(R.id.userDisplayName);
         userEmail = headerView.findViewById(R.id.userDisplayEmail);
-        nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes");
+        nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes").setIcon(R.drawable.ic_event_note_black_24dp);
+        nav_view.getMenu().findItem(R.id.addNote).setTitle("Add Group Note");
 
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
@@ -244,37 +244,8 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
                     overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                     finish();
                 }).setNegativeButton("Logout", (dialog, which) -> {
-                    //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
-
-                    DocumentReference documentReference = fStore.collection("users").document(user.getUid());
-                    documentReference.delete().addOnSuccessListener(aVoid -> Toast.makeText(SharedNote.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(SharedNote.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
-
-                    //Fixme: delete groups created by temp user [Not Working]
-
-                    Query query = fStore.collection("groups").whereEqualTo("CreatedBy",user.getUid());
-                    query.get()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
-                                        String idDelete = document.getId();
-                                        fStore.collection("groups").document(idDelete)
-                                                .delete()
-                                                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
-                                                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            });
-
-                    //delete the temp user from fAuth
-
-                    user.delete().addOnSuccessListener(aVoid -> {
-                        startActivity(new Intent(getApplicationContext(), Splash.class));
-                        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                        finish();
-                    });
+                    startActivity(new Intent(this, Logout.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 });
         warning.show();
     }

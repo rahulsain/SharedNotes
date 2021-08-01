@@ -37,8 +37,10 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
+import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
+import com.rahuls.sharednotes.note.AddNote;
 import com.rahuls.sharednotes.note.MainActivity;
 import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
@@ -56,7 +58,6 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
     FirestoreRecyclerAdapter<Group, NoteViewHolder> groupAdapter;
     FirebaseUser user;
     FirebaseAuth fAuth;
-    Group group;
     CollectionReference groupCol;
     DocumentReference userDocRef;
     TextView userName;
@@ -78,6 +79,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
 
         groupCol = fStore.collection("groups");
         userDocRef = fStore.collection("users").document(user.getUid());
+
 
         Query query = groupCol.whereArrayContains("GroupMembers", user.getEmail());
 //        Toast.makeText(getApplicationContext(),user.getEmail() + " " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
@@ -151,7 +153,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         View headerView = nav_view.getHeaderView(0);
         userName = headerView.findViewById(R.id.userDisplayName);
         userEmail = headerView.findViewById(R.id.userDisplayEmail);
-        nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes");
+        nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes").setIcon(R.drawable.ic_event_note_black_24dp);
 
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
@@ -182,8 +184,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                 break;
 
             case R.id.addNote:
-                Intent intent = new Intent(this, AddGroupNote.class);
-                intent.putExtra("groupId", group.getGroupId());
+                Intent intent = new Intent(this, AddNote.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 break;
@@ -227,36 +228,8 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                     overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                     finish();
                 }).setNegativeButton("Logout", (dialog, which) -> {
-                    //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
-
-                    userDocRef.delete().addOnSuccessListener(aVoid -> Toast.makeText(CreateGroup.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(CreateGroup.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
-
-                    //delete groups created by temp user
-
-                    Query query = groupCol.whereEqualTo("CreatedBy", user.getUid());
-                    query.get()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    for (QueryDocumentSnapshot document : task.getResult()) {
-                                        String idDelete = document.getId();
-                                        Log.d(TAG, idDelete + " => " + document.getData());
-                                        groupCol.document(idDelete)
-                                                .delete()
-                                                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
-                                                .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
-                                    }
-                                } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
-                                }
-                            });
-
-                    //delete the temp user from fAuth
-
-                    user.delete().addOnSuccessListener(aVoid -> {
-                        startActivity(new Intent(getApplicationContext(), Splash.class));
-                        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                        finish();
-                    });
+                    startActivity(new Intent(this, Logout.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 });
         warning.show();
     }

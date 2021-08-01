@@ -6,7 +6,6 @@
     <string name="title_activity_add_note">Add Note</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="temp_user">Temporary User</string>
     <string name="title_activity_create_group">Groups</string>
     <string name="title_activity_shared_note">Group Notes</string>
@@ -38,5 +37,13 @@
     <string name="mail_icon">Mail Icon</string>
     <string name="phone_icon">Phone Icon</string>
     <string name="change_profile">Change Profile</string>
-
+    <string name="general">General</string>
+    <string name="groups">Groups</string>
+    <string name="add_note">Add Personal Note</string>
+    <string name="sync_notes">Sync Notes</string>
+    <string name="support">Support</string>
+    <string name="rate_app">Rate App</string>
+    <string name="share_app">Share App</string>
+    <string name="logout">Logout</string>
+    <string name="delete_profile">Delete Profile</string>
 </resources>

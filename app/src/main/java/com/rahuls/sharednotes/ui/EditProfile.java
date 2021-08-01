@@ -3,7 +3,6 @@ package com.rahuls.sharednotes.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -38,6 +37,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
+import com.rahuls.sharednotes.auth.Logout;
+import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.group.CreateGroup;
 import com.rahuls.sharednotes.note.AddNote;
 import com.rahuls.sharednotes.note.MainActivity;
@@ -115,7 +116,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         profileImageView = findViewById(R.id.profileImageView);
         saveBtn = findViewById(R.id.saveProfileInfo);
 
-        StorageReference profileRef = storageReference.child("users/"+fAuth.getCurrentUser().getUid()+"/profile.jpg");
+        StorageReference profileRef = storageReference.child("users/"+user.getUid()+"/profile.jpg");
         profileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().load(uri).into(profileImageView));
 
         profileImageView.setOnClickListener(v -> {
@@ -212,17 +213,42 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
                 } else {
                     Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
                 }
+                break;
 
             case R.id.logout:
-                Toast.makeText(this, "Can't Logout from here.", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, MainActivity.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                checkUser();
                 break;
 
             default:
                 Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
+    }
+
+    private void checkUser() {
+        //if user is real or not
+        if (user.isAnonymous()) {
+            displayAlert();
+        } else {
+            FirebaseAuth.getInstance().signOut();
+            startActivity(new Intent(getApplicationContext(), Splash.class));
+            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            finish();
+        }
+    }
+
+    private void displayAlert() {
+        androidx.appcompat.app.AlertDialog.Builder warning = new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Are you sure?")
+                .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
+                .setPositiveButton("Sync Note", (dialog, which) -> {
+                    startActivity(new Intent(getApplicationContext(), Register.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    finish();
+                }).setNegativeButton("Logout", (dialog, which) -> {
+                    startActivity(new Intent(this, Logout.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                });
+        warning.show();
     }
 
 
@@ -245,7 +271,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
 
         if (requestCode == GALLERY_INTENT_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                Uri imageUri = data.getData();
+                Uri imageUri = data != null ? data.getData() : null;
                 profileImageView.setImageURI(imageUri);
                 uploadImageToFirebase(imageUri);
             }
@@ -254,7 +280,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
 
     private void uploadImageToFirebase(Uri imageUri) {
         // upload image to firebase storage
-        final StorageReference fileRef = storageReference.child("users/"+fAuth.getCurrentUser().getUid()+"/profile.jpg");
+        final StorageReference fileRef = storageReference.child("users/"+user.getUid()+"/profile.jpg");
         fileRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().load(uri).into(profileImageView))).addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "Failed.", Toast.LENGTH_SHORT).show());
 
     }
@@ -328,7 +354,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         myAlertDialog.setMessage("How do you want to set your picture?");
 
         myAlertDialog.setPositiveButton("Gallery",
-                (DialogInterface.OnClickListener) (arg0, arg1) -> {
+                (arg0, arg1) -> {
                     Intent openGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(openGalleryIntent,GALLERY_INTENT_CODE);
                 });

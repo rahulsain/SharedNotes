@@ -36,6 +36,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
+import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.group.CreateGroup;
 import com.rahuls.sharednotes.model.Note;
@@ -220,18 +221,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                     finish();
                 }).setNegativeButton("Logout", (dialog, which) -> {
-                    //Fixme: delete data created by the Temp User [Not Feasible on Client Side]
-
-                    DocumentReference documentReference = fStore.collection("users").document(user.getUid());
-                    documentReference.delete().addOnSuccessListener(aVoid -> Toast.makeText(MainActivity.this, "User Deleted", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(MainActivity.this, "Error in deleting User", Toast.LENGTH_SHORT).show());
-
-                    //delete the temp user
-
-                    user.delete().addOnSuccessListener(aVoid -> {
-                        startActivity(new Intent(getApplicationContext(), Splash.class));
-                        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                        finish();
-                    });
+                    startActivity(new Intent(this, Logout.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
                 });
         warning.show();
     }

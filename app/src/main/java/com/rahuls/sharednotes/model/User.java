@@ -6,7 +6,7 @@ public class User {
     private String UserName;
     private String UserEmail;
     private String UserId;
-    private String UserPhotoURL;
+//    private String UserPhotoURL;
     private List<String> UserGroups;
 
     public User() {
@@ -22,7 +22,7 @@ public class User {
         this.UserName = name;
         this.UserEmail = UserEmail;
         this.UserId = UserId;
-        this.UserPhotoURL = UserPhotoURL;
+//        this.UserPhotoURL = UserPhotoURL;
         this.UserGroups = UserGroups;
     }
 
@@ -50,13 +50,13 @@ public class User {
         this.UserId = userId;
     }
 
-    public String getUserPhotoURL() {
-        return UserPhotoURL;
-    }
+//    public String getUserPhotoURL() {
+//        return UserPhotoURL;
+//    }
 
-    public void setUserPhotoURL(String userPhotoURL) {
-        this.UserPhotoURL = userPhotoURL;
-    }
+//    public void setUserPhotoURL(String userPhotoURL) {
+//        this.UserPhotoURL = userPhotoURL;
+//    }
 
     public List<String> getUserGroups() {
         return UserGroups;

@@ -18,7 +18,6 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
@@ -54,7 +53,8 @@ public class Register extends AppCompatActivity {
 
 //        if (fAuth.getCurrentUser() != null) {
             // User is signed in
-            userID = fAuth.getCurrentUser().getUid();
+        FirebaseUser user = fAuth.getCurrentUser();
+        userID = user.getUid();
 //        } else {
 //            // No user is signed in
 //            userID = "NotSignedIn";
@@ -83,7 +83,7 @@ public class Register extends AppCompatActivity {
 
             User userM = new User(gUserName,gUserEmail,userID);
 
-            userM.setUserPhotoURL("");
+//            userM.setUserPhotoURL("");
             userM.setUserGroups(Arrays.asList(""));
 
             if(gUserName.isEmpty() || gUserEmail.isEmpty() || gUserPassword.isEmpty() || gUserConfirmPassword.isEmpty()) {
@@ -106,31 +106,31 @@ public class Register extends AppCompatActivity {
             progressBar.setVisibility(View.VISIBLE);
 
             AuthCredential credential = EmailAuthProvider.getCredential(gUserEmail,gUserPassword);
-            fAuth.getCurrentUser().linkWithCredential(credential).addOnSuccessListener(authResult -> {
+            user.linkWithCredential(credential).addOnSuccessListener(authResult -> {
                 Toast.makeText(Register.this, "Notes are Synced.", Toast.LENGTH_SHORT).show();
 
                 DocumentReference documentReference = fStore.collection("users").document(userID);
-                Map<String,Object> user = new HashMap<>();
-                user.put("UserName",userM.getName());
-                user.put("UserEmail",userM.getUserEmail());
-                user.put("UserId",userM.getUserId());
+                Map<String,Object> userD = new HashMap<>();
+                userD.put("UserName",userM.getName());
+                userD.put("UserEmail",userM.getUserEmail());
+                userD.put("UserId",userM.getUserId());
 //                user.put("UserPhotoURL",userM.getUserPhotoURL());
 //                user.put("UserGroups",userM.getUserGroups());
 
-                documentReference.set(user).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for "+ userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for "+ userID));
+                documentReference.set(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for "+ userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for "+ userID));
 
-                FirebaseUser firebaseUser = fAuth.getCurrentUser();
-                UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-                        .setDisplayName(gUserName).build();
+//                FirebaseUser firebaseUser = fAuth.getCurrentUser();
+//                UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
+//                        .setDisplayName(gUserName).build();
+//
+//                Objects.requireNonNull(firebaseUser).updateProfile(request);
 
-                Objects.requireNonNull(firebaseUser).updateProfile(request);
-
-                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                startActivity(new Intent(this,MainActivity.class));
                 overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
                 finish();
 
             }).addOnFailureListener(e -> {
-                Toast.makeText(Register.this, "Failed to connect. Try Again.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Failed to connect. Try Again.", Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
             });
 

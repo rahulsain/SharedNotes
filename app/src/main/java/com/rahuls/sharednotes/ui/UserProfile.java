@@ -28,9 +28,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
+import com.rahuls.sharednotes.auth.Logout;
+import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.group.CreateGroup;
 import com.rahuls.sharednotes.note.AddNote;
-import com.rahuls.sharednotes.note.MainActivity;
 import com.squareup.picasso.Picasso;
 
 public class UserProfile extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -110,13 +111,15 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
 
         DocumentReference documentReference = fStore.collection("users").document(userId);
         documentReference.addSnapshotListener(this, (documentSnapshot, e) -> {
-            if (documentSnapshot.exists()) {
-                phone.setText(documentSnapshot.getString("UserPhone"));
-                fullName.setText(documentSnapshot.getString("UserName"));
-                email.setText(documentSnapshot.getString("UserEmail"));
+            if(e == null) {
+                if (documentSnapshot.exists()) {
+                    phone.setText(documentSnapshot.getString("UserPhone"));
+                    fullName.setText(documentSnapshot.getString("UserName"));
+                    email.setText(documentSnapshot.getString("UserEmail"));
 
-            } else {
-                Log.d("tag", "onEvent: Document do not exists");
+                } else {
+                    Log.d("tag", "onEvent: Document do not exists");
+                }
             }
         });
 
@@ -178,17 +181,42 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
                 } else {
                     Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
                 }
+                break;
 
             case R.id.logout:
-                Toast.makeText(this, "Can't Logout from here.", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(this, MainActivity.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                checkUser();
                 break;
 
             default:
                 Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
+    }
+
+    private void checkUser() {
+        //if user is real or not
+        if (user.isAnonymous()) {
+            displayAlert();
+        } else {
+            fAuth.signOut();
+            startActivity(new Intent(getApplicationContext(), Splash.class));
+            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            finish();
+        }
+    }
+
+    private void displayAlert() {
+        androidx.appcompat.app.AlertDialog.Builder warning = new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Are you sure?")
+                .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
+                .setPositiveButton("Sync Note", (dialog, which) -> {
+                    startActivity(new Intent(getApplicationContext(), Register.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    finish();
+                }).setNegativeButton("Logout", (dialog, which) -> {
+                    startActivity(new Intent(this, Logout.class));
+                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    });
+        warning.show();
     }
 
 }
