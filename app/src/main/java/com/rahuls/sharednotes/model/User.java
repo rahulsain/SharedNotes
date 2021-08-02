@@ -12,26 +12,25 @@ public class User {
     public User() {
     }
 
-    public User(String name, String UserEmail, String UserId) {
-        this.UserName = name;
+    public User(String UserName, String UserEmail, String UserId) {
+        this.UserName = UserName;
         this.UserEmail = UserEmail;
         this.UserId = UserId;
     }
 
-    public User(String name, String UserEmail, String UserId, String UserPhotoURL, List<String> UserGroups) {
-        this.UserName = name;
+    public User(String UserName, String UserEmail, String UserId, List<String> UserGroups) {
+        this.UserName = UserName;
         this.UserEmail = UserEmail;
         this.UserId = UserId;
-//        this.UserPhotoURL = UserPhotoURL;
         this.UserGroups = UserGroups;
     }
 
-    public String getName() {
+    public String getUserName() {
         return UserName;
     }
 
-    public void setName(String name) {
-        this.UserName = name;
+    public void setUserName(String UserName) {
+        this.UserName = UserName;
     }
 
     public String getUserEmail() {

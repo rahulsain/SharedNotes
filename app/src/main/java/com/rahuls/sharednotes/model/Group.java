@@ -17,57 +17,57 @@ public class Group {
     public Group() {
     }
 
-    public Group(String groupName, String createdBy, Timestamp createdAt, String groupId, List<String> groupMembers, List<String> groupMemberUId) {
-        GroupName = groupName;
-        CreatedBy = createdBy;
-        CreatedAt = createdAt;
-        GroupId = groupId;
-        GroupMembers = groupMembers;
-        GroupMemberUId = groupMemberUId;
+    public Group(String GroupName, String CreatedBy, Timestamp CreatedAt, String GroupId, List<String> GroupMembers, List<String> GroupMemberUId) {
+        this.GroupName = GroupName;
+        this.CreatedBy = CreatedBy;
+        this.CreatedAt = CreatedAt;
+        this.GroupId = GroupId;
+        this.GroupMembers = GroupMembers;
+        this.GroupMemberUId = GroupMemberUId;
     }
 
     public String getGroupName() {
         return GroupName;
     }
 
-    public void setGroupName(String groupName) {
-        GroupName = groupName;
+    public void setGroupName(String GroupName) {
+        this.GroupName = GroupName;
     }
 
     public String getCreatedBy() {
         return CreatedBy;
     }
 
-    public void setCreatedBy(String createdBy) {
-        CreatedBy = createdBy;
+    public void setCreatedBy(String CreatedBy) {
+        this.CreatedBy = CreatedBy;
     }
 
     public Timestamp getCreatedAt() {
         return CreatedAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        CreatedAt = createdAt;
+    public void setCreatedAt(Timestamp CreatedAt) {
+        this.CreatedAt = CreatedAt;
     }
 
     public String getGroupId() {
         return GroupId;
     }
 
-    public void setGroupId(String groupId) {
-        GroupId = groupId;
+    public void setGroupId(String GroupId) {
+        this.GroupId = GroupId;
     }
 
     public List<String> getGroupMembers() {
         return GroupMembers;
     }
 
-    public void setGroupMembers(List<String> groupMembers) {
-        GroupMembers = groupMembers;
+    public void setGroupMembers(List<String> GroupMembers) {
+        this.GroupMembers = GroupMembers;
     }
 
     public List<String> getGroupMemberUId() { return GroupMemberUId; }
 
-    public void setGroupMemberUId(List<String> groupMemberUId) { GroupMemberUId = groupMemberUId; }
+    public void setGroupMemberUId(List<String> GroupMemberUId) { this.GroupMemberUId = GroupMemberUId; }
 
 }

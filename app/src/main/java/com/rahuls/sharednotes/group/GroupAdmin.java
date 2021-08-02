@@ -36,18 +36,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
+public class GroupAdmin extends AppCompatActivity implements INotesRVAdapter {
 
-    private static final String TAG = "AddGroup";
+    private static final String TAG = "GroupAdmin";
     FirebaseFirestore fStore;
     EditText groupName, groupMember;
     ProgressBar progressBarSave;
     FirebaseUser user;
     Group group;
     NotesViewModel viewModel;
+    DocumentReference documentReference;
     List<String> groupMembers;
 
     @Override
@@ -67,7 +67,6 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
         groupMembers = new ArrayList<>();
         group = new Group();
 
-
         RecyclerView memberList = findViewById(R.id.memberList);
         memberList.setLayoutManager(new LinearLayoutManager(this));
         EmailRVAdapter adapter = new EmailRVAdapter(this, this);
@@ -81,6 +80,22 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
             if (demo != null) {
                 adapter.updateList(demo);
             }
+        });
+
+        String groupId = getIntent().getStringExtra("groupId");
+        documentReference = fStore.collection("groups").document(groupId);
+
+        documentReference.get().addOnSuccessListener(documentSnapshot -> {
+            group = documentSnapshot.toObject(Group.class);
+
+            groupName.setText(group.getGroupName());
+
+            List<String> tem = group.getGroupMembers();
+
+                for (String mem : tem) {
+                    groupMembers.add(mem);
+                    viewModel.insertNotes(new Email(mem));
+                }
         });
 
         FloatingActionButton fab1 = findViewById(R.id.addGroupMember);
@@ -107,20 +122,13 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
 
             progressBarSave.setVisibility(View.VISIBLE);
 
-            group.setGroupId(UUID.randomUUID().toString());
-            group.setCreatedBy(user.getUid());
-
             //save group
-            DocumentReference documentReference = fStore.collection("groups").document(group.getGroupId());
             Map<String, Object> groupDetails = new HashMap<>();
             groupDetails.put("GroupName", group.getGroupName());
-            groupDetails.put("CreatedBy", group.getCreatedBy());
-            groupDetails.put("CreatedAt", FieldValue.serverTimestamp());
-            groupDetails.put("GroupId", group.getGroupId());
             groupDetails.put("GroupMembers", group.getGroupMembers());
 
-            documentReference.set(groupDetails).addOnSuccessListener(aVoid -> {
-                Toast.makeText(this, "Group Created", Toast.LENGTH_SHORT).show();
+            documentReference.update(groupDetails).addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Group Updated", Toast.LENGTH_SHORT).show();
                 viewModel.deleteAllNotes();
                 startActivity(new Intent(this, CreateGroup.class));
             }).addOnFailureListener(e -> {
@@ -128,6 +136,7 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
                 progressBarSave.setVisibility(View.INVISIBLE);
             });
         });
+
     }
 
     private boolean isValid(String email) {
@@ -152,7 +161,7 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.close) {
-            Toast.makeText(this, "Group not created", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Group not updated", Toast.LENGTH_SHORT).show();
             viewModel.deleteAllNotes();
             onBackPressed();
         }
@@ -162,44 +171,8 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
     @Override
     public void onItemClicked(@NotNull Email email) {
         viewModel.deleteNotes(email);
+        documentReference.update("GroupMembers", FieldValue.arrayRemove(email.getText()));
         groupMembers.remove(email.getText());
     }
-
-//    void checkEmailExistsOrNot(String email){
-//        FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email).addOnCompleteListener(task -> {
-//            Log.d(TAG,""+task.getResult().getSignInMethods().size());
-//            if (task.getResult().getSignInMethods().size() == 0){
-//                // email not existed
-//
-//            }else {
-//                // email existed
-//                updateUserData(email);
-//            }
-//
-//        }).addOnFailureListener(Throwable::printStackTrace);
-//    }
-
-//    private void updateUserData(String email) {
-//        DocumentReference documentReference = fStore.collection("users").document(user.getUid());
-//        FirebaseDatabase.getInstance().getReference().addValueEventListener(new ValueEventListener() {
-//            private String emailDB;
-//
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-//                    User user = snapshot.getValue(User.class);
-//
-//                    emailDB = Objects.requireNonNull(user).getUserEmail();
-//
-//                        if(emailDB.equals(email)){
-//                            //add this to User database
-//
-//                        }
-//                }
-//            }
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {}
-//        });
-//    }
 
 }

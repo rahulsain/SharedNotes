@@ -8,20 +8,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
-    val allNotes: LiveData<List<Notes>>
+    val allEmail: LiveData<List<Email>>
     private val repository: NotesRepository
     init {
-        val dao = NotesDatabase.getDatabase(application).getNotesDao()
+        val dao = EmailDatabase.getDatabase(application).getEmailDao()
         repository = NotesRepository(dao)
-        allNotes = repository.allNotes
+        allEmail = repository.allEmail
 
     }
 
-    fun deleteNotes(notes: Notes) = viewModelScope.launch(Dispatchers.IO) {
-        repository.delete(notes)
+    fun deleteNotes(email: Email) = viewModelScope.launch(Dispatchers.IO) {
+        repository.delete(email)
     }
 
-    fun insertNotes(notes: Notes) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insert(notes)
+    fun insertNotes(email: Email) = viewModelScope.launch(Dispatchers.IO) {
+        repository.insert(email)
+    }
+
+    fun deleteAllNotes() = viewModelScope.launch(Dispatchers.IO) {
+        repository.deleteAll()
     }
 }

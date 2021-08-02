@@ -9,18 +9,18 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.rahuls.sharednotes.R
 
-class NotesRVAdapter(private val context: Context, private val listener: INotesRVAdapter): RecyclerView.Adapter<NotesRVAdapter.NotesViewHolder>() {
+class EmailRVAdapter(private val context: Context, private val listener: INotesRVAdapter): RecyclerView.Adapter<EmailRVAdapter.NotesViewHolder>() {
 
-    private val allNotes = ArrayList<Notes>()
+    private val allNotes = ArrayList<Email>()
 
     inner class NotesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-        val textView: TextView = itemView.findViewById<TextView>(R.id.text)
-        val deleteButton: ImageView = itemView.findViewById<ImageView>(R.id.deleteButton)
+        val textView: TextView = itemView.findViewById(R.id.memberEmail)
+        val deleteButton: ImageView = itemView.findViewById(R.id.deleteButton)
 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NotesViewHolder {
-        val viewHolder = NotesViewHolder(LayoutInflater.from(context).inflate(R.layout.content_add_group, parent,false))
+        val viewHolder = NotesViewHolder(LayoutInflater.from(context).inflate(R.layout.group_member, parent,false))
         viewHolder.deleteButton.setOnClickListener{
             listener.onItemClicked(allNotes[viewHolder.adapterPosition])
         }
@@ -32,7 +32,7 @@ class NotesRVAdapter(private val context: Context, private val listener: INotesR
         holder.textView.text = currentNotes.text
     }
 
-    fun updateList(newList: List<Notes>){
+    fun updateList(newList: List<Email>){
         allNotes.clear()
         allNotes.addAll(newList)
 
@@ -40,11 +40,10 @@ class NotesRVAdapter(private val context: Context, private val listener: INotesR
     }
 
     override fun getItemCount(): Int {
-
         return allNotes.size
     }
 }
 
 interface INotesRVAdapter{
-    fun onItemClicked(notes: Notes)
+    fun onItemClicked(email: Email)
 }
