@@ -124,7 +124,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                 final String groupId = groupAdapter.getSnapshots().getSnapshot(position).getId();
 
                 if (!user.getUid().equals(model.getCreatedBy())) {
-                    holder.groupDisband.setVisibility(View.GONE);
+                    holder.groupDisband.setVisibility(View.INVISIBLE);
                 }
 
                 holder.view.setOnClickListener(view -> {

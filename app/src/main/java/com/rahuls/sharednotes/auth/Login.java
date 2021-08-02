@@ -72,10 +72,14 @@ public class Login extends AppCompatActivity {
             //delete notes first
 
             spinner.setVisibility(View.VISIBLE);
-
-            if (user.isAnonymous()) {
-                deleteTempDataBase();
+            try {
+                if (user.isAnonymous()) {
+                    deleteTempDataBase();
+                }
+            } catch (NullPointerException e) {
+                Toast.makeText(Login.this, "Some Error occurred, please restart the app", Toast.LENGTH_SHORT).show();
             }
+
             fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
                 Toast.makeText(Login.this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
 
