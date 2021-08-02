@@ -32,7 +32,7 @@
                 android:id="@+id/nestedView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="40dp"
+                android:layout_marginEnd="80dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent">
@@ -59,13 +59,24 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <ImageView
+                android:id="@+id/groupDisband"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_delete_forever_24"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/groupInfo"
+                app:layout_constraintStart_toEndOf="@id/nestedView"
+                app:layout_constraintTop_toTopOf="parent"
+                android:contentDescription="@string/disband_group" />
+
+            <ImageView
                 android:id="@+id/groupInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_baseline_info_24"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/nestedView"
+                app:layout_constraintStart_toEndOf="@id/groupDisband"
                 app:layout_constraintTop_toTopOf="parent"
                 android:contentDescription="@string/group_info" />
 

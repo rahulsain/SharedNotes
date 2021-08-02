@@ -81,12 +81,6 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         groupCol = fStore.collection("groups");
         userDocRef = fStore.collection("users").document(user.getUid());
 
-        userDocRef.get().addOnSuccessListener(documentSnapshot -> {
-            UserName[0] = documentSnapshot.getString("UserName");
-//                EmailId[0] = documentSnapshot.getString("UserEmail");
-            userName.setText(UserName[0]);
-        });
-
 
         Query query = groupCol.whereArrayContains("GroupMembers", user.getEmail());
 //        Toast.makeText(getApplicationContext(),user.getEmail() + " " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
@@ -129,6 +123,10 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                 holder.groupName.setText(model.getGroupName());
                 final String groupId = groupAdapter.getSnapshots().getSnapshot(position).getId();
 
+                if (!user.getUid().equals(model.getCreatedBy())) {
+                    holder.groupDisband.setVisibility(View.GONE);
+                }
+
                 holder.view.setOnClickListener(view -> {
                     Intent intent = new Intent(view.getContext(), SharedNote.class).putExtra("groupId", groupId);
                     intent.putExtra("UserName", UserName[0]);
@@ -139,13 +137,51 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                     AlertDialog.Builder warning = new AlertDialog.Builder(view.getContext()).setTitle("What Operation You Want to Perform")
                             .setMessage("If You are admin, you can only add or remove members. Else you can leave the group on your behalf.")
                             .setNegativeButton("Add/ Remove Members", (dialog, which) -> {
-
-                                startActivity(new Intent(view.getContext(), AddGroup.class));
-
+                                if (user.getUid().equals(model.getCreatedBy())) {
+                                    Intent intent = new Intent(view.getContext(), GroupAdmin.class);
+                                    intent.putExtra("groupId", groupId);
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(view.getContext(), "You are not Group Admin", Toast.LENGTH_SHORT).show();
+                                }
                             }).setPositiveButton("Leave Group", (dialog, which) -> {
                                 userDocRef.update("UserGroups", FieldValue.arrayRemove(groupId));
                                 groupCol.document(groupId).update("GroupMembers", FieldValue.arrayRemove(user.getEmail()));
                                 groupCol.document(groupId).update("GroupMemberUId", FieldValue.arrayRemove(user.getUid()));
+                            });
+                    warning.show();
+                });
+
+                holder.groupDisband.setOnClickListener(view -> {
+                    AlertDialog.Builder warning = new AlertDialog.Builder(view.getContext()).setTitle("Are You Sure")
+                            .setMessage("You are going to delete this group forever")
+                            .setNegativeButton("No", (dialog, which) -> {
+                                // do nothing
+                            }).setPositiveButton("Yes", (dialog, which) -> {
+
+                                //delete the group notes
+
+                                Query queryN = groupCol.document(groupId).collection("ourNotes");
+
+                                queryN.get().addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        for (QueryDocumentSnapshot document : task.getResult()) {
+                                            String idDelete = document.getId();
+                                            Log.d(TAG, idDelete + " => " + document.getData());
+                                            groupCol.document(groupId).collection("myNotes").document(idDelete)
+                                                    .delete()
+                                                    .addOnSuccessListener(aVoid -> Log.d(TAG, "Notes created by this Group are successfully deleted!"))
+                                                    .addOnFailureListener(e -> Log.w(TAG, "Error deleting group notes", e));
+                                        }
+                                    } else {
+                                        Log.d(TAG, "Error getting documents for group notes: ", task.getException());
+                                    }
+                                });
+
+                                //delete the group
+                                groupCol.document(groupId).delete()
+                                        .addOnSuccessListener(aVoid -> Log.d(TAG, "Group created by user successfully deleted!"))
+                                        .addOnFailureListener(e -> Log.w(TAG, "Error deleting group", e));
                             });
                     warning.show();
                 });
@@ -180,7 +216,14 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
             userName.setText(R.string.temp_user);
-        } else { userEmail.setText(user.getEmail()); }
+        } else {
+            userEmail.setText(user.getEmail());
+            userDocRef.get().addOnSuccessListener(documentSnapshot -> {
+                UserName[0] = documentSnapshot.getString("UserName");
+//                EmailId[0] = documentSnapshot.getString("UserEmail");
+                userName.setText(UserName[0]);
+            });
+        }
 
         FloatingActionButton fab = findViewById(R.id.addGroupFloat);
         fab.setOnClickListener(view ->
@@ -286,7 +329,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         TextView groupName;
         View view;
         CardView mCardView;
-        ImageView groupInfo;
+        ImageView groupInfo, groupDisband;
 
         public NoteViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -295,6 +338,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
             view = itemView;
             mCardView = itemView.findViewById(R.id.groupCard);
             groupInfo = itemView.findViewById(R.id.groupInfo);
+            groupDisband = itemView.findViewById(R.id.groupDisband);
         }
     }
 }

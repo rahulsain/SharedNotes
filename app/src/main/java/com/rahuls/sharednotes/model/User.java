@@ -18,11 +18,10 @@ public class User {
         this.UserId = UserId;
     }
 
-    public User(String UserName, String UserEmail, String UserId, String UserPhotoURL, List<String> UserGroups) {
+    public User(String UserName, String UserEmail, String UserId, List<String> UserGroups) {
         this.UserName = UserName;
         this.UserEmail = UserEmail;
         this.UserId = UserId;
-//        this.UserPhotoURL = UserPhotoURL;
         this.UserGroups = UserGroups;
     }
 

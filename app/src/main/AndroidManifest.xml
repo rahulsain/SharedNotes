@@ -45,6 +45,10 @@
             android:label="@string/title_activity_create_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".group.GroupAdmin"
+            android:label="@string/group_admin"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".group.SharedNote"
             android:label="@string/title_activity_shared_note"
             android:theme="@style/AppTheme.NoActionBar" />

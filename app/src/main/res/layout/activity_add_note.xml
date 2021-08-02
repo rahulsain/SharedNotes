@@ -25,10 +25,11 @@
                 android:backgroundTint="@android:color/transparent"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:hint="Title"
+                android:hint="@string/title"
                 android:textColor="#fff"
                 android:textColorHint="#FFFFFF"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:autofillHints="false" />
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -46,6 +47,7 @@
         android:layout_margin="@dimen/fab_margin"
         app:backgroundTint="@color/colorPrimaryDark"
         app:maxImageSize="30dp"
-        app:srcCompat="@drawable/ic_save_black_24dp" />
+        app:srcCompat="@drawable/ic_save_black_24dp"
+        android:contentDescription="@string/save_note" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
