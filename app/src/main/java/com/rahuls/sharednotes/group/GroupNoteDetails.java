@@ -43,7 +43,7 @@ public class GroupNoteDetails extends AppCompatActivity {
         title.setText(titleS);
         content.setBackgroundColor(getResources().getColor(data.getIntExtra("code",0),null));
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab2);
         fab.setOnClickListener(view -> {
             if(!userId.equals(createdBy)){
                 Toast.makeText(view.getContext(),"You are not the author, you can't edit",Toast.LENGTH_SHORT).show();

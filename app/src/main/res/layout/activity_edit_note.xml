@@ -7,7 +7,7 @@
     tools:context=".note.EditNote">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
+        android:id="@+id/toolbar2"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
@@ -23,10 +23,11 @@
             android:backgroundTint="@android:color/transparent"
             android:ems="10"
             android:inputType="textPersonName"
-            android:hint="Title"
+            android:hint="@string/note_title"
             android:textColor="#fff"
             android:textColorHint="#FFFFFF"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:autofillHints="false" />
     </androidx.appcompat.widget.Toolbar>
 
     <EditText
@@ -41,7 +42,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
+        android:autofillHints="false" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/saveEditedNote"
@@ -53,7 +55,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:maxImageSize="30dp"
-        app:srcCompat="@drawable/ic_save_black_24dp" />
+        app:srcCompat="@drawable/ic_save_black_24dp"
+        android:contentDescription="@string/update_note" />
 
     <ProgressBar
         android:id="@+id/progressBar2"
@@ -64,5 +67,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2" />
 </androidx.constraintlayout.widget.ConstraintLayout>

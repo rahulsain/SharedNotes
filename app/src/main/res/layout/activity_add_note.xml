@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+            android:id="@+id/toolbar3"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -25,7 +25,7 @@
                 android:backgroundTint="@android:color/transparent"
                 android:ems="10"
                 android:inputType="textPersonName"
-                android:hint="@string/title"
+                android:hint="@string/note_title"
                 android:textColor="#fff"
                 android:textColorHint="#FFFFFF"
                 android:textStyle="bold"
@@ -34,13 +34,12 @@
         </androidx.appcompat.widget.Toolbar>
 
 
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_add_note" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/fab1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

@@ -3,13 +3,13 @@ package com.rahuls.sharednotes.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -39,7 +39,7 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
-import com.rahuls.sharednotes.group.CreateGroup;
+import com.rahuls.sharednotes.group.ListGroups;
 import com.rahuls.sharednotes.note.AddNote;
 import com.rahuls.sharednotes.note.MainActivity;
 import com.squareup.picasso.Picasso;
@@ -57,7 +57,7 @@ import java.util.regex.Pattern;
 
 public class EditProfile extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    public static final String TAG = "TAG";
+    public static final String TAG = "EditProfile";
     private static final int GALLERY_INTENT_CODE = 105;
     private static final int CAMERA_INTENT_CODE = 102;
     private static final int CAMERA_PERM_CODE = 101;
@@ -77,7 +77,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
-        Toolbar toolbar = findViewById(R.id.toolbar_fragment);
+        Toolbar toolbar = findViewById(R.id.toolbar_fragment2);
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer5);
@@ -145,7 +145,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
 
             final String email1 = profileEmail.getText().toString();
             if(userEmail.getText().toString().equals("rahul1champ@gmail.com")) {
-                Toast.makeText(EditProfile.this, "Email can't be changed. Not registered to our database. Sign in first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Email can't be changed. Not registered to our database. Sign in first", Toast.LENGTH_SHORT).show();
             } else {
                 user.updateEmail(email1).addOnSuccessListener(aVoid -> {
                     DocumentReference docRef = fStore.collection("users").document(user.getUid());
@@ -154,12 +154,12 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
                     edited.put("UserName", profileFullName.getText().toString());
                     edited.put("UserPhone", profilePhone.getText().toString());
                     docRef.update(edited).addOnSuccessListener(aVoid1 -> {
-                        Toast.makeText(EditProfile.this, "Profile Updated", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        Toast.makeText(v.getContext(), "Profile Updated", Toast.LENGTH_SHORT).show();
+                        startNewActivity(v.getContext(), MainActivity.class);
                         finish();
                     });
-                    Toast.makeText(EditProfile.this, "Email is changed.", Toast.LENGTH_SHORT).show();
-                }).addOnFailureListener(e -> Toast.makeText(EditProfile.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                    Toast.makeText(v.getContext(), "Email is changed.", Toast.LENGTH_SHORT).show();
+                }).addOnFailureListener(e -> Toast.makeText(v.getContext(), e.getMessage(), Toast.LENGTH_SHORT).show());
             }
 
         });
@@ -168,7 +168,6 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         profileFullName.setText(fullName);
         profilePhone.setText(phone);
 
-        Log.d(TAG, "onCreate: " + fullName + " " + email + " " + phone);
     }
 
     private void askCameraPermissions() {
@@ -192,35 +191,33 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         }
     }
 
+    private void startNewActivity(Context context, Class<?> actClass) {
+        Intent intent = new Intent(context, actClass);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        switch (item.getItemId()) {
-            case R.id.groups:
-                startActivity(new Intent(this, CreateGroup.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.addNote:
-                startActivity(new Intent(this, AddNote.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.sync:
-                if (user.isAnonymous()) {
-                    startActivity(new Intent(this, Login.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                } else {
-                    Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
-                }
-                break;
-
-            case R.id.logout:
-                checkUser();
-                break;
-
-            default:
-                Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
+        int itemId = item.getItemId();
+        if (itemId == R.id.groups) {
+            Intent intent = new Intent(this, ListGroups.class);
+            intent.putExtra("userName", getIntent().getStringExtra("userName"));
+            intent.putExtra("userEmail", getIntent().getStringExtra("userEmail"));
+            startActivity(intent);
+        } else if (itemId == R.id.addNote) {
+            startNewActivity(this, AddNote.class);
+        } else if (itemId == R.id.sync) {
+            if (user.isAnonymous()) {
+                startNewActivity(this, Login.class);
+            } else {
+                Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (itemId == R.id.logout) {
+            checkUser();
+        } else {
+            Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
@@ -230,9 +227,8 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         if (user.isAnonymous()) {
             displayAlert();
         } else {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(getApplicationContext(), Splash.class));
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            fAuth.signOut();
+            startNewActivity(this, Splash.class);
             finish();
         }
     }
@@ -241,17 +237,11 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         androidx.appcompat.app.AlertDialog.Builder warning = new androidx.appcompat.app.AlertDialog.Builder(this).setTitle("Are you sure?")
                 .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
                 .setPositiveButton("Sync Note", (dialog, which) -> {
-                    startActivity(new Intent(getApplicationContext(), Register.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    startNewActivity(this, Register.class);
                     finish();
-                }).setNegativeButton("Logout", (dialog, which) -> {
-                    startActivity(new Intent(this, Logout.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                });
+                }).setNegativeButton("Logout", (dialog, which) -> startNewActivity(this, Logout.class));
         warning.show();
     }
-
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {

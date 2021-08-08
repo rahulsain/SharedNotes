@@ -22,7 +22,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupOnly="true">
 
         <activity
             android:name=".auth.Logout"
@@ -41,8 +42,8 @@
             android:label="@string/title_activity_add_note"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".group.CreateGroup"
-            android:label="@string/title_activity_create_group"
+            android:name=".group.ListGroups"
+            android:label="@string/title_activity_list_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".group.GroupAdmin"
@@ -54,7 +55,8 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.Splash"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -1,11 +1,11 @@
 package com.rahuls.sharednotes.note;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +38,7 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
-import com.rahuls.sharednotes.group.CreateGroup;
+import com.rahuls.sharednotes.group.ListGroups;
 import com.rahuls.sharednotes.model.Note;
 import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
@@ -63,17 +63,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar1);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
         user = fAuth.getCurrentUser();
 
-        Query query = fStore.collection("users").document(user.getUid())
-                .collection("myNotes").orderBy("title", Query.Direction.DESCENDING);
 
-        //query notes > uid > myNotes
+
+        Query query = fStore.collection("users").document(user.getUid())
+                .collection("myNotes").orderBy("createdOn", Query.Direction.DESCENDING);
+
+        //query notes > uid > myNotes > notes
 
         FirestoreRecyclerOptions<Note> allNotes = new FirestoreRecyclerOptions.Builder<Note>()
                 .setQuery(query, Note.class).build();
@@ -83,7 +85,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             protected void onBindViewHolder(@NonNull NoteViewHolder holder, int position, @NonNull Note model) {
                 holder.noteTitle.setText(model.getTitle());
                 holder.noteContent.setText(model.getContent());
+                holder.view.findViewById(R.id.userDetails).setVisibility(View.GONE);
+
                 final int colorCode = getRandomColor();
+
                 holder.mCardView.setBackgroundColor(holder.view.getResources().getColor(colorCode, null));
                 final String docId = noteAdapter.getSnapshots().getSnapshot(position).getId();
 
@@ -95,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     intent.putExtra("noteId", docId);
                     view.getContext().startActivity(intent);
                 });
+
                 ImageView menuIcon = holder.view.findViewById(R.id.menuIcon);
+
                 menuIcon.setOnClickListener(v -> {
                     final String docId1 = noteAdapter.getSnapshots().getSnapshot(position).getId();
                     PopupMenu menu = new PopupMenu(v.getContext(), v);
@@ -129,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        noteLists = findViewById(R.id.notelist);
+        noteLists = findViewById(R.id.noteList);
 
         drawerLayout = findViewById(R.id.drawer1);
         nav_view = findViewById(R.id.nav_view1);
@@ -151,52 +158,43 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             userName.setText(R.string.temp_user);
         } else {
             DocumentReference docRef = fStore.collection("users").document(user.getUid());
-            docRef.get().addOnSuccessListener(documentSnapshot -> {
-                String displayName = documentSnapshot.getString("UserName");
-                userName.setText(displayName);
-            });
+            docRef.get().addOnSuccessListener(documentSnapshot -> userName.setText(documentSnapshot.getString("UserName")));
 
             userEmail.setText(user.getEmail());
-
         }
 
         FloatingActionButton fab = findViewById(R.id.addNoteFloat);
-        fab.setOnClickListener(v -> {
-            startActivity(new Intent(v.getContext(), AddNote.class));
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-        });
+        fab.setOnClickListener(v -> startNewActivity(v.getContext(), AddNote.class));
 
+    }
+
+    private void startNewActivity(Context context, Class<?> actClass) {
+        Intent intent = new Intent(context, actClass);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        switch (item.getItemId()) {
-            case R.id.groups:
-                startActivity(new Intent(this, CreateGroup.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.addNote:
-                startActivity(new Intent(this, AddNote.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.sync:
-                if (user.isAnonymous()) {
-                    startActivity(new Intent(this, Login.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                } else {
-                    Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
-                }
-                break;
-
-            case R.id.logout:
-                checkUser();
-                break;
-
-            default:
-                Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
+        int itemId = item.getItemId();
+        if (itemId == R.id.groups) {
+            Intent intent = new Intent(this, ListGroups.class);
+            intent.putExtra("userName", userName.getText().toString());
+            intent.putExtra("userEmail", userEmail.getText().toString());
+            startActivity(intent);
+        } else if (itemId == R.id.addNote) {
+            startNewActivity(this, AddNote.class);
+        } else if (itemId == R.id.sync) {
+            if (user.isAnonymous()) {
+                startNewActivity(this, Login.class);
+            } else {
+                Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (itemId == R.id.logout) {
+            checkUser();
+        } else {
+            Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
@@ -206,9 +204,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (user.isAnonymous()) {
             displayAlert();
         } else {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(getApplicationContext(), Splash.class));
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            fAuth.signOut();
+            startNewActivity(this, Splash.class);
             finish();
         }
     }
@@ -217,27 +214,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AlertDialog.Builder warning = new AlertDialog.Builder(this).setTitle("Are you sure?")
                 .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
                 .setPositiveButton("Sync Note", (dialog, which) -> {
-                    startActivity(new Intent(getApplicationContext(), Register.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    startNewActivity(this, Register.class);
                     finish();
-                }).setNegativeButton("Logout", (dialog, which) -> {
-                    startActivity(new Intent(this, Logout.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                });
+                }).setNegativeButton("Logout", (dialog, which) -> startNewActivity(this, Logout.class));
         warning.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
+        getMenuInflater().inflate(R.menu.option_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.settings) {
-            Toast.makeText(this,"Coming Soon",Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         } else if (item.getItemId() == R.id.userProfile) {
             Intent intent = new Intent(this, UserProfile.class);
             intent.putExtra("userName", userName.getText().toString());

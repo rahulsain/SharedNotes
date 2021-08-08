@@ -54,7 +54,7 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_group);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar5);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -95,8 +95,11 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
             }
         });
 
-        FloatingActionButton fab2 = findViewById(R.id.fab);
+        FloatingActionButton fab2 = findViewById(R.id.fab3);
         fab2.setOnClickListener(view -> {
+            if(!groupMembers.contains(user.getEmail()) && !user.isAnonymous()){
+                groupMembers.add(user.getEmail());
+            }
             group.setGroupName(groupName.getText().toString());
             group.setGroupMembers(groupMembers);
 
@@ -122,7 +125,10 @@ public class AddGroup extends AppCompatActivity implements INotesRVAdapter {
             documentReference.set(groupDetails).addOnSuccessListener(aVoid -> {
                 Toast.makeText(this, "Group Created", Toast.LENGTH_SHORT).show();
                 viewModel.deleteAllNotes();
-                startActivity(new Intent(this, CreateGroup.class));
+                Intent intent = new Intent(this, ListGroups.class);
+                intent.putExtra("userName", getIntent().getStringExtra("userName"));
+                intent.putExtra("userEmail", getIntent().getStringExtra("userEmail"));
+                startActivity(intent);
             }).addOnFailureListener(e -> {
                 Toast.makeText(this, "Error, try again", Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);

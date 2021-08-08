@@ -1,11 +1,11 @@
 package com.rahuls.sharednotes.group;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,9 +48,9 @@ import com.rahuls.sharednotes.ui.UserProfile;
 
 import java.util.List;
 
-public class CreateGroup extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ListGroups extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "CreateGroup";
+    private static final String TAG = "ListGroups";
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle toggle;
     NavigationView nav_view;
@@ -67,24 +67,19 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_group);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        setContentView(R.layout.activity_list_groups);
+        Toolbar toolbar = findViewById(R.id.toolbar4);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
         user = fAuth.getCurrentUser();
 
-        final String[] UserName = {""};
-//        final String[] EmailId = {""};
-
         groupCol = fStore.collection("groups");
         userDocRef = fStore.collection("users").document(user.getUid());
 
 
         Query query = groupCol.whereArrayContains("GroupMembers", user.getEmail());
-//        Toast.makeText(getApplicationContext(),user.getEmail() + " " + user.getDisplayName(),Toast.LENGTH_SHORT).show();
-//        Intent data = getIntent();
 
         query.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -98,9 +93,6 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
 
                     //update user data
                     if (gMembers.contains(user.getEmail())) {
-
-                        // Atomically remove a region from the "regions" array field.
-//                        userIDRef.update("UserGroups", FieldValue.arrayRemove(""));
 
                         // Atomically add a new groupID to the "UserGroups" array field.
                         userDocRef.update("UserGroups", FieldValue.arrayUnion(gID));
@@ -129,7 +121,8 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
 
                 holder.view.setOnClickListener(view -> {
                     Intent intent = new Intent(view.getContext(), SharedNote.class).putExtra("groupId", groupId);
-                    intent.putExtra("UserName", UserName[0]);
+                    intent.putExtra("UserName", getIntent().getStringExtra("userName"));
+                    intent.putExtra("UserEmail", getIntent().getStringExtra("userEmail"));
                     startActivity(intent);
                 });
 
@@ -140,14 +133,20 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
                                 if (user.getUid().equals(model.getCreatedBy())) {
                                     Intent intent = new Intent(view.getContext(), GroupAdmin.class);
                                     intent.putExtra("groupId", groupId);
+                                    intent.putExtra("userName", getIntent().getStringExtra("userName"));
+                                    intent.putExtra("userEmail", getIntent().getStringExtra("userEmail"));
                                     startActivity(intent);
                                 } else {
                                     Toast.makeText(view.getContext(), "You are not Group Admin", Toast.LENGTH_SHORT).show();
                                 }
                             }).setPositiveButton("Leave Group", (dialog, which) -> {
-                                userDocRef.update("UserGroups", FieldValue.arrayRemove(groupId));
-                                groupCol.document(groupId).update("GroupMembers", FieldValue.arrayRemove(user.getEmail()));
-                                groupCol.document(groupId).update("GroupMemberUId", FieldValue.arrayRemove(user.getUid()));
+                                if (!user.getUid().equals(model.getCreatedBy())) {
+                                    userDocRef.update("UserGroups", FieldValue.arrayRemove(groupId));
+                                    groupCol.document(groupId).update("GroupMembers", FieldValue.arrayRemove(user.getEmail()));
+                                    groupCol.document(groupId).update("GroupMemberUId", FieldValue.arrayRemove(user.getUid()));
+                                } else {
+                                    Toast.makeText(view.getContext(), "You are Group Admin, you only can disband the group for all", Toast.LENGTH_SHORT).show();
+                                }
                             });
                     warning.show();
                 });
@@ -195,7 +194,7 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
             }
         };
 
-        groupLists = findViewById(R.id.grouplist);
+        groupLists = findViewById(R.id.groupList);
 
         drawerLayout = findViewById(R.id.drawer3);
         nav_view = findViewById(R.id.nav_view3);
@@ -213,53 +212,41 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         userEmail = headerView.findViewById(R.id.userDisplayEmail);
         nav_view.getMenu().findItem(R.id.groups).setTitle("Personal Notes").setIcon(R.drawable.ic_event_note_black_24dp);
 
+        userEmail.setText(getIntent().getStringExtra("userEmail"));
+        userName.setText(getIntent().getStringExtra("userName"));
+
         if (user.isAnonymous()) {
             userEmail.setVisibility(View.GONE);
-            userName.setText(R.string.temp_user);
-        } else {
-            userEmail.setText(user.getEmail());
-            userDocRef.get().addOnSuccessListener(documentSnapshot -> {
-                UserName[0] = documentSnapshot.getString("UserName");
-//                EmailId[0] = documentSnapshot.getString("UserEmail");
-                userName.setText(UserName[0]);
-            });
         }
 
+
         FloatingActionButton fab = findViewById(R.id.addGroupFloat);
-        fab.setOnClickListener(view ->
-                startActivity(new Intent(view.getContext(), AddGroup.class)));
+        fab.setOnClickListener(view -> {
+            Intent intent = new Intent(this, AddGroup.class);
+            intent.putExtra("userName", getIntent().getStringExtra("userName"));
+            intent.putExtra("userEmail", getIntent().getStringExtra("userEmail"));
+            startActivity(intent);
+        });
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
-        switch (item.getItemId()) {
-            case R.id.groups:
-                startActivity(new Intent(this, MainActivity.class));
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.addNote:
-                Intent intent = new Intent(this, AddNote.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                break;
-
-            case R.id.sync:
-                if (user.isAnonymous()) {
-                    startActivity(new Intent(this, Login.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                } else {
-                    Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
-                }
-                break;
-
-            case R.id.logout:
-                checkUser();
-                break;
-
-            default:
-                Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
+        int itemId = item.getItemId();
+        if (itemId == R.id.groups) {
+            startNewActivity(this, MainActivity.class);
+        } else if (itemId == R.id.addNote) {
+            startNewActivity(this, AddNote.class);
+        } else if (itemId == R.id.sync) {
+            if (user.isAnonymous()) {
+                startNewActivity(this, Login.class);
+            } else {
+                Toast.makeText(this, "You are Already Connected.", Toast.LENGTH_SHORT).show();
+            }
+        } else if (itemId == R.id.logout) {
+            checkUser();
+        } else {
+            Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
         return false;
     }
@@ -269,9 +256,8 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         if (user.isAnonymous()) {
             displayAlert();
         } else {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(getApplicationContext(), Splash.class));
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            fAuth.signOut();
+            startNewActivity(this, Splash.class);
             finish();
         }
     }
@@ -280,20 +266,15 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         AlertDialog.Builder warning = new AlertDialog.Builder(this).setTitle("Are you sure?")
                 .setMessage("You are logged in with temp Account. Logging out will permanently delete your data.")
                 .setPositiveButton("Sync Note", (dialog, which) -> {
-                    startActivity(new Intent(getApplicationContext(), Register.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                    startNewActivity(this, Register.class);
                     finish();
-                }).setNegativeButton("Logout", (dialog, which) -> {
-                    startActivity(new Intent(this, Logout.class));
-                    overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
-                });
+                }).setNegativeButton("Logout", (dialog, which) -> startNewActivity(this, Logout.class));
         warning.show();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
+        getMenuInflater().inflate(R.menu.option_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -322,6 +303,12 @@ public class CreateGroup extends AppCompatActivity implements NavigationView.OnN
         if (groupAdapter != null) {
             groupAdapter.stopListening();
         }
+    }
+
+    private void startNewActivity(Context context, Class<?> actClass) {
+        Intent intent = new Intent(context, actClass);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
 
     public static class NoteViewHolder extends RecyclerView.ViewHolder {
