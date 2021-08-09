@@ -51,7 +51,7 @@ Now, after making any changes to your project on the system, follow these simple
 
 `git commit -m "Commit Message"`
 
-`git pull upstream master` *This command checks for any conflicts with the main repo. Go through the conflicts and make changes, if required.*
+`git pull upstream main` *This command checks for any conflicts with the main repo. Go through the conflicts and make changes, if required.*
 
 `git push`
 
@@ -62,7 +62,7 @@ Now, after making any changes to your project on the system, follow these simple
 After pushing the changes to your forked repository (your-username/SharedNotes), all you have to do is create a new pull request from your account by simply clicking on the *Pull Request* button.
 
 > NOTE:
-> If you are some commits behind of rahulsain:master then you need to first git pull upstream master from the system, push it to your forked repository and then create the Pull Request.
+> If you are some commits behind of rahulsain:main then you need to first git pull upstream main from the system, push it to your forked repository and then create the Pull Request.
 
 Give a detailed and useful explaination of what you did in the comments of pull requests and someone from the maintainers or team leads will review the code and accept the pull request or ask you to change some things before merging it.
 
