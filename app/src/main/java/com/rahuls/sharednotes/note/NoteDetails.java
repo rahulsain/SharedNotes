@@ -17,8 +17,6 @@ import java.util.Objects;
 
 public class NoteDetails extends AppCompatActivity {
 
-    Intent data;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +25,7 @@ public class NoteDetails extends AppCompatActivity {
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
 
-        data = getIntent();
+        Intent data = getIntent();
 
         TextView content = findViewById(R.id.noteDetailsContent);
         TextView title = findViewById(R.id.noteDetailsTitle);
@@ -37,7 +35,7 @@ public class NoteDetails extends AppCompatActivity {
         title.setText(data.getStringExtra("title"));
         content.setBackgroundColor(getResources().getColor(data.getIntExtra("code",0),null));
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab2);
         fab.setOnClickListener(view -> {
             Intent intent = new Intent(view.getContext(),EditNote.class);
             intent.putExtra("title",data.getStringExtra("title"));

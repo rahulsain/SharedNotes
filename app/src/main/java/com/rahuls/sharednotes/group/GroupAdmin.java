@@ -3,7 +3,6 @@ package com.rahuls.sharednotes.group;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -54,7 +53,7 @@ public class GroupAdmin extends AppCompatActivity implements INotesRVAdapter {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_group);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar5);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -110,7 +109,7 @@ public class GroupAdmin extends AppCompatActivity implements INotesRVAdapter {
             }
         });
 
-        FloatingActionButton fab2 = findViewById(R.id.fab);
+        FloatingActionButton fab2 = findViewById(R.id.fab3);
         fab2.setOnClickListener(view -> {
             group.setGroupName(groupName.getText().toString());
             group.setGroupMembers(groupMembers);
@@ -128,11 +127,14 @@ public class GroupAdmin extends AppCompatActivity implements INotesRVAdapter {
             groupDetails.put("GroupMembers", group.getGroupMembers());
 
             documentReference.update(groupDetails).addOnSuccessListener(aVoid -> {
-                Toast.makeText(this, "Group Updated", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Group Updated", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(view.getContext(), ListGroups.class);
+                intent.putExtra("userName", getIntent().getStringExtra("userName"));
+                intent.putExtra("userEmail", getIntent().getStringExtra("userEmail"));
                 viewModel.deleteAllNotes();
-                startActivity(new Intent(this, CreateGroup.class));
+                startActivity(intent);
             }).addOnFailureListener(e -> {
-                Toast.makeText(this, "Error, try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Error, try again", Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);
             });
         });
@@ -153,8 +155,7 @@ public class GroupAdmin extends AppCompatActivity implements INotesRVAdapter {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.close_menu, menu);
+        getMenuInflater().inflate(R.menu.close_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

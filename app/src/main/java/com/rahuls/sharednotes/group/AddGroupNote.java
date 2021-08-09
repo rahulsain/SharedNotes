@@ -37,7 +37,7 @@ public class AddGroupNote extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_note);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar3);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -45,25 +45,30 @@ public class AddGroupNote extends AppCompatActivity {
         noteTitle = findViewById(R.id.addNoteTitle);
         noteContent = findViewById(R.id.addNoteContent);
 
-        progressBarSave = findViewById(R.id.progressBar);
+        progressBarSave = findViewById(R.id.progressBar1);
 
         data = getIntent();
 
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab1);
         fab.setOnClickListener(view -> {
 
             String nTitle = noteTitle.getText().toString();
             String nContent = noteContent.getText().toString();
 
             if(nTitle.isEmpty() || nContent.isEmpty()){
-                Toast.makeText(AddGroupNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(),"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
                 return;
             }
 
             progressBarSave.setVisibility(View.VISIBLE);
 
             String gID = data.getStringExtra("groupId");
+            String createdByName = "Temporary User";
+
+            if(!user.isAnonymous()){
+                createdByName = getIntent().getStringExtra("createdByName");
+            }
 
             //save note
             DocumentReference documentReference = fStore.collection("groups").document(gID)
@@ -73,12 +78,15 @@ public class AddGroupNote extends AppCompatActivity {
             note.put("content",nContent);
             note.put("createdOn", FieldValue.serverTimestamp());
             note.put("createdBy", user.getUid());
+            note.put("createdByEmail", user.getEmail());
+            note.put("createdByName",createdByName);
+            note.put("lastEditedOn", FieldValue.serverTimestamp());
 
             documentReference.set(note).addOnSuccessListener(aVoid -> {
-                Toast.makeText(AddGroupNote.this, "Note added", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Note added", Toast.LENGTH_SHORT).show();
                 onBackPressed();
             }).addOnFailureListener(e -> {
-                Toast.makeText(AddGroupNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Error, try again", Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);
             });
         });

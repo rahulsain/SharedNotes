@@ -33,7 +33,7 @@ public class EditNote extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -45,11 +45,8 @@ public class EditNote extends AppCompatActivity {
         editNoteTitle = findViewById(R.id.editNoteTitle);
         editNoteContent = findViewById(R.id.editNoteContent);
 
-        String noteTitle = data.getStringExtra("title");
-        String noteContent = data.getStringExtra("content");
-
-        editNoteTitle.setText(noteTitle);
-        editNoteContent.setText(noteContent);
+        editNoteTitle.setText(data.getStringExtra("title"));
+        editNoteContent.setText(data.getStringExtra("content"));
 
         FloatingActionButton fab = findViewById(R.id.saveEditedNote);
         fab.setOnClickListener(v -> {
@@ -72,10 +69,10 @@ public class EditNote extends AppCompatActivity {
             note.put("createdOn", FieldValue.serverTimestamp());
 
             documentReference.update(note).addOnSuccessListener(aVoid -> {
-                Toast.makeText(EditNote.this, "Note saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditNote.this, "Note updated", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }).addOnFailureListener(e -> {
-                Toast.makeText(EditNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditNote.this, "Error, try again: " + e, Toast.LENGTH_SHORT).show();
                 spinner.setVisibility(View.INVISIBLE);
             });
         });

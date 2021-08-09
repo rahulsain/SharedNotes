@@ -14,6 +14,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.ui.Splash;
 
@@ -29,6 +31,8 @@ public class Logout extends AppCompatActivity {
         FirebaseFirestore fStore = FirebaseFirestore.getInstance();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         String userID = user.getUid();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        StorageReference profileRef = storageReference.child("users/" + userID + "/profile.jpg");
 
         Log.d(TAG, "Current UserID is: " + userID);
 
@@ -110,11 +114,15 @@ public class Logout extends AppCompatActivity {
                     }
                 });
 
+        //delete user profile pic stored in firebase storage
+
+        profileRef.delete().addOnSuccessListener(aVoid -> Log.d(TAG, "Profile Picture of User is successfully deleted!")).addOnFailureListener(aVoid -> Log.d(TAG, "Profile Picture of User is not deleted: " + aVoid.getMessage()));
+
         //delete user from fAuth
 
         user.delete().addOnSuccessListener(aVoid -> {
             startActivity(new Intent(this, Splash.class));
-            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            overridePendingTransition(0,0);
             finish();
         });
     }

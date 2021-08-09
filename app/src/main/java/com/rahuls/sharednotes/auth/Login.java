@@ -1,8 +1,11 @@
 package com.rahuls.sharednotes.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,6 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,6 +29,7 @@ import com.rahuls.sharednotes.note.MainActivity;
 import com.rahuls.sharednotes.ui.Splash;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
 
@@ -50,7 +55,7 @@ public class Login extends AppCompatActivity {
         spinner = findViewById(R.id.progressBar3);
 
         lButton = findViewById(R.id.loginBtn);
-        forgetPassword = findViewById(R.id.forgotPasword);
+        forgetPassword = findViewById(R.id.forgotPassword);
         createAccount = findViewById(R.id.createAccount);
 
         fStore = FirebaseFirestore.getInstance();
@@ -72,12 +77,16 @@ public class Login extends AppCompatActivity {
             //delete notes first
 
             spinner.setVisibility(View.VISIBLE);
-
-            if (user.isAnonymous()) {
-                deleteTempDataBase();
+            try {
+                if (user.isAnonymous()) {
+                    deleteTempDataBase();
+                }
+            } catch (NullPointerException e) {
+                Toast.makeText(Login.this, "Some Error occurred, please restart the app", Toast.LENGTH_SHORT).show();
             }
+
             fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
-                Toast.makeText(Login.this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
 
                 Intent i = new Intent(this, MainActivity.class);
 //              set the new task and clear flags
@@ -85,28 +94,51 @@ public class Login extends AppCompatActivity {
                 startActivity(i);
 
             }).addOnFailureListener(e -> {
-                Toast.makeText(Login.this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-//                    Log.w(TAG, "Login Failed! " + e.getMessage() + e.getCause());
+                Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 spinner.setVisibility(View.GONE);
-                startActivity(new Intent(this, Splash.class));
-
-                //fore - close the app
-
-//                final Handler handler = new Handler();
-//                handler.postDelayed(() -> {
-//                    // Do something after 5s = 5000ms
-//                    moveTaskToBack(true);
-//                    android.os.Process.killProcess(android.os.Process.myPid());
-//                    System.exit(1);
-//                }, 7000);
+                startNewActivity(v.getContext(), Splash.class);
 
             });
 
 
         });
 
-        createAccount.setOnClickListener(v -> startActivity(new Intent(this, Register.class)));
-        forgetPassword.setOnClickListener(v -> Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show());
+        createAccount.setOnClickListener(v -> startNewActivity(v.getContext(), Register.class));
+        forgetPassword.setOnClickListener(v -> {
+
+            final EditText emailID = new EditText(v.getContext());
+            emailID.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+            final android.app.AlertDialog.Builder passwordResetDialog = new android.app.AlertDialog.Builder(v.getContext());
+            passwordResetDialog.setTitle("Forgot Password");
+            passwordResetDialog.setMessage("Enter Registered Email Id");
+            passwordResetDialog.setView(emailID);
+
+            passwordResetDialog.setPositiveButton("Forgot Password", (dialog, which) -> {
+                // extract the email and send reset link
+                String emailId = emailID.getText().toString();
+                if(isValid(emailId)) {
+                    fAuth.sendPasswordResetEmail(emailId)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(v.getContext(),"Password Reset mail sent. Check your inbox",Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(v.getContext(),"Make sure your email is registered first",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                } else {
+                    Toast.makeText(v.getContext(),"Email is not valid",Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            passwordResetDialog.setNegativeButton("Cancel", (dialog, which) -> {
+                // close
+            });
+
+            passwordResetDialog.create().show();
+
+
+        });
     }
 
     private void deleteTempDataBase() {
@@ -196,15 +228,40 @@ public class Login extends AppCompatActivity {
         user.delete().addOnSuccessListener(aVoid -> Toast.makeText(this, "Temp User and its Data Deleted.", Toast.LENGTH_SHORT).show());
     }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        startNewActivity(this,MainActivity.class);
+        finish();
+        return super.onOptionsItemSelected(item);
+    }
+
     private void showWarning() {
         AlertDialog.Builder warning = new AlertDialog.Builder(this).setTitle("Are you sure?")
                 .setMessage("Linking with Existing Account will delete the temp notes. Create new Account to save them.")
                 .setPositiveButton("Save Note", (dialog, which) -> {
-                    startActivity(new Intent(getApplicationContext(), Register.class));
+                    startNewActivity(getApplicationContext(), Register.class);
                     finish();
                 }).setNegativeButton("It's Ok", (dialog, which) -> {
                     //do nothing
                 });
         warning.show();
+    }
+
+    private boolean isValid(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\." +
+                "[a-zA-Z0-9_+&*-]+)*@" +
+                "(?:[a-zA-Z0-9-]+\\.)+[a-z" +
+                "A-Z]{2,7}$";
+
+        Pattern pat = Pattern.compile(emailRegex);
+        if (email == null)
+            return false;
+        return pat.matcher(email).matches();
+    }
+
+    private void startNewActivity(Context context, Class<?> actClass) {
+        Intent intent = new Intent(context, actClass);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
 }

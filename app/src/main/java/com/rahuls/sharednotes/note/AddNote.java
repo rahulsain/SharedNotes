@@ -2,7 +2,6 @@ package com.rahuls.sharednotes.note;
 
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -35,7 +34,7 @@ public class AddNote extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_note);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar3);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -43,9 +42,9 @@ public class AddNote extends AppCompatActivity {
         noteTitle = findViewById(R.id.addNoteTitle);
         noteContent = findViewById(R.id.addNoteContent);
 
-        progressBarSave = findViewById(R.id.progressBar);
+        progressBarSave = findViewById(R.id.progressBar1);
         
-        FloatingActionButton fab = findViewById(R.id.fab);
+        FloatingActionButton fab = findViewById(R.id.fab1);
         fab.setOnClickListener(view -> {
 
             String nTitle = noteTitle.getText().toString();
@@ -61,6 +60,7 @@ public class AddNote extends AppCompatActivity {
             //save note
             DocumentReference documentReference = fStore.collection("users").document(user.getUid())
                     .collection("myNotes").document();
+
             Map<String,Object> note = new HashMap<>();
             note.put("title",nTitle);
             note.put("content",nContent);
@@ -70,7 +70,7 @@ public class AddNote extends AppCompatActivity {
                 Toast.makeText(AddNote.this, "Note added", Toast.LENGTH_SHORT).show();
                 onBackPressed();
             }).addOnFailureListener(e -> {
-                Toast.makeText(AddNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(AddNote.this, "Error, try again: " + e, Toast.LENGTH_SHORT).show();
                 progressBarSave.setVisibility(View.INVISIBLE);
             });
         });
@@ -78,8 +78,7 @@ public class AddNote extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.close_menu,menu);
+        getMenuInflater().inflate(R.menu.close_menu,menu);
         return super.onCreateOptionsMenu(menu);
     }
 

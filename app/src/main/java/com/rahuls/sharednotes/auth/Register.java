@@ -1,5 +1,6 @@
 package com.rahuls.sharednotes.auth;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,12 +20,12 @@ import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.model.User;
 import com.rahuls.sharednotes.note.MainActivity;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -50,17 +51,9 @@ public class Register extends AppCompatActivity {
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
-
-//        if (fAuth.getCurrentUser() != null) {
-            // User is signed in
         FirebaseUser user = fAuth.getCurrentUser();
         userID = user.getUid();
-//        } else {
-//            // No user is signed in
-//            userID = "NotSignedIn";
-//            Toast.makeText(this,"App may crash, sign in required to continue. Try Again",Toast.LENGTH_SHORT).show();
-//            finish();
-//        }
+
 
 
         rUserName = findViewById(R.id.userName);
@@ -68,11 +61,11 @@ public class Register extends AppCompatActivity {
         rUserPassword = findViewById(R.id.password);
         rUserConfirmPassword = findViewById(R.id.passwordConfirm);
 
-        syncAccount = findViewById(R.id.createAccount);
+        syncAccount = findViewById(R.id.createAccount1);
         loginActivity = findViewById(R.id.login);
         progressBar = findViewById(R.id.progressBar4);
 
-        loginActivity.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(),Login.class)));
+        loginActivity.setOnClickListener(v -> startNewActivity(v.getContext(),Login.class));
 
 
         syncAccount.setOnClickListener(v -> {
@@ -82,9 +75,6 @@ public class Register extends AppCompatActivity {
             String gUserEmail = rUserEmail.getText().toString();
 
             User userM = new User(gUserName,gUserEmail,userID);
-
-//            userM.setUserPhotoURL("");
-            userM.setUserGroups(Arrays.asList(""));
 
             if(gUserName.isEmpty() || gUserEmail.isEmpty() || gUserPassword.isEmpty() || gUserConfirmPassword.isEmpty()) {
                 Toast.makeText(Register.this, "All fields are required", Toast.LENGTH_SHORT).show();
@@ -114,19 +104,11 @@ public class Register extends AppCompatActivity {
                 userD.put("UserName",userM.getUserName());
                 userD.put("UserEmail",userM.getUserEmail());
                 userD.put("UserId",userM.getUserId());
-//                user.put("UserPhotoURL",userM.getUserPhotoURL());
-//                user.put("UserGroups",userM.getUserGroups());
+                userD.put("RegisterOn", FieldValue.serverTimestamp());
 
                 documentReference.set(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for "+ userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for "+ userID));
 
-//                FirebaseUser firebaseUser = fAuth.getCurrentUser();
-//                UserProfileChangeRequest request = new UserProfileChangeRequest.Builder()
-//                        .setDisplayName(gUserName).build();
-//
-//                Objects.requireNonNull(firebaseUser).updateProfile(request);
-
-                startActivity(new Intent(this,MainActivity.class));
-                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
+                startNewActivity(this,MainActivity.class);
                 finish();
 
             }).addOnFailureListener(e -> {
@@ -140,7 +122,7 @@ public class Register extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        startActivity(new Intent(this, MainActivity.class));
+        startNewActivity(this,MainActivity.class);
         finish();
         return super.onOptionsItemSelected(item);
     }
@@ -155,5 +137,11 @@ public class Register extends AppCompatActivity {
         if (email == null)
             return false;
         return pat.matcher(email).matches();
+    }
+
+    private void startNewActivity(Context context, Class<?> actClass) {
+        Intent intent = new Intent(context, actClass);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
 }

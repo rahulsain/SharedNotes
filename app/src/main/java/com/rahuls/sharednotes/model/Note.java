@@ -8,7 +8,11 @@ public class Note {
     private String content;
     @ServerTimestamp
     private Timestamp createdOn;
+    @ServerTimestamp
+    private Timestamp lastEditedOn;
     private String createdBy;
+    private String createdByEmail;
+    private String createdByName;
 
     public Note() {
     }
@@ -18,11 +22,14 @@ public class Note {
         this.content = content;
     }
 
-    public Note(String title, String content,Timestamp createdOn,String createdBy) {
+    public Note(String title, String content,Timestamp createdOn,String createdBy,Timestamp lastEditedOn,String createdByEmail,String createdByName) {
         this.title = title;
         this.content = content;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
+        this.lastEditedOn = lastEditedOn;
+        this.createdByEmail = createdByEmail;
+        this.createdByName = createdByName;
     }
 
     public String getTitle() {
@@ -52,4 +59,16 @@ public class Note {
     public String getCreatedBy() { return createdBy; }
 
     public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public Timestamp getLastEditedOn() { return lastEditedOn; }
+
+    public void setLastEditedOn(Timestamp lastEditedOn) { this.lastEditedOn = lastEditedOn; }
+
+    public String getCreatedByEmail() { return createdByEmail; }
+
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
+
+    public String getCreatedByName() { return createdByName; }
+
+    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
 }

@@ -32,7 +32,7 @@ public class EditGroupNote extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_note);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
 
         fStore = FirebaseFirestore.getInstance();
@@ -57,7 +57,7 @@ public class EditGroupNote extends AppCompatActivity {
             String nContent = editNoteContent.getText().toString();
 
             if(nTitle.isEmpty() || nContent.isEmpty()){
-                Toast.makeText(EditGroupNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(),"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -69,16 +69,17 @@ public class EditGroupNote extends AppCompatActivity {
             Map<String,Object> note = new HashMap<>();
             note.put("title",nTitle);
             note.put("content",nContent);
-            note.put("createdOn", FieldValue.serverTimestamp());
+            note.put("lastEditedOn", FieldValue.serverTimestamp());
 
             documentReference.update(note).addOnSuccessListener(aVoid -> {
-                Toast.makeText(EditGroupNote.this, "Note saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Note saved", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), SharedNote.class);
                 intent.putExtra("groupId",data.getStringExtra("groupId"));
                 intent.putExtra("UserName",data.getStringExtra("UserName"));
+                intent.putExtra("UserEmail",data.getStringExtra("UserEmail"));
                 startActivity(intent);
             }).addOnFailureListener(e -> {
-                Toast.makeText(EditGroupNote.this, "Error, try again", Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "Error, try again", Toast.LENGTH_SHORT).show();
                 spinner.setVisibility(View.INVISIBLE);
             });
         });
