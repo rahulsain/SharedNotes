@@ -138,6 +138,9 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
                 if(newPassword.isEmpty()){
                     Toast.makeText(v.getContext(),"Password should be atleast of 6 characters.",Toast.LENGTH_SHORT).show();
                     return;
+                } else if(user.isAnonymous()){
+                    Toast.makeText(v.getContext(),"This feature is only available for signed in users.",Toast.LENGTH_SHORT).show();
+                    return;
                 }
                 user.updatePassword(newPassword).addOnSuccessListener(aVoid -> Toast.makeText(v.getContext(), "Password Reset Successfully.", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(v.getContext(), "Password Reset Failed. Try Resigning In", Toast.LENGTH_SHORT).show());
             });
