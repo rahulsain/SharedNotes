@@ -28,6 +28,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -228,6 +229,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
             displayAlert();
         } else {
             fAuth.signOut();
+            Identity.getSignInClient(this).signOut();
             startNewActivity(this, Splash.class);
             finish();
         }

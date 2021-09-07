@@ -2,6 +2,7 @@ package com.rahuls.sharednotes.auth;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
@@ -18,12 +19,17 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -35,6 +41,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.note.MainActivity;
 import com.rahuls.sharednotes.ui.Splash;
@@ -48,6 +55,7 @@ public class Login extends AppCompatActivity {
 
     private static final String TAG = "Login";
     private static final int RC_SIGN_IN = 1009;
+    private static final int REQ_ONE_TAP = 1008;
     EditText lEmail, lPassword;
     Button lButton;
     TextView forgetPassword, createAccount;
@@ -56,6 +64,9 @@ public class Login extends AppCompatActivity {
     FirebaseUser user;
     ProgressBar spinner;
     GoogleSignInClient mGoogleSignInClient;
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
+    private boolean showOneTapUI = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +75,25 @@ public class Login extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).setTitle("Login to Shared Notes");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        oneTapClient = Identity.getSignInClient(this);
+        signInRequest = BeginSignInRequest.builder()
+                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                        .setSupported(true)
+                        .build())
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                // Automatically sign in when exactly one credential is retrieved.
+                .setAutoSelectEnabled(true)
+                .build();
+
         // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.firebase_web_client_id))
+                .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
 
@@ -114,22 +141,7 @@ public class Login extends AppCompatActivity {
                 Toast.makeText(Login.this, "Some Error occurred, please restart the app", Toast.LENGTH_SHORT).show();
             }
 
-            fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
-                Toast.makeText(this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
-
-                Intent i = new Intent(this, MainActivity.class);
-//              set the new task and clear flags
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-
-            }).addOnFailureListener(e -> {
-                Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                spinner.setVisibility(View.GONE);
-                startNewActivity(v.getContext(), Splash.class);
-
-            });
-
-
+            firebaseAuthWithCredentials(mEmail, mPassword);
         });
 
         createAccount.setOnClickListener(v -> startNewActivity(v.getContext(), Register.class));
@@ -270,8 +282,23 @@ public class Login extends AppCompatActivity {
                 .setPositiveButton("Save Note", (dialog, which) -> {
                     startNewActivity(getApplicationContext(), Register.class);
                     finish();
-                }).setNegativeButton("It's Ok", (dialog, which) -> {
-                    //do nothing
+                }).setNegativeButton("Ok", (dialog, which) -> {
+                    //show one tap signIn google
+                    oneTapClient.beginSignIn(signInRequest)
+                            .addOnSuccessListener(this, result -> {
+                                try {
+                                    startIntentSenderForResult(
+                                            result.getPendingIntent().getIntentSender(), REQ_ONE_TAP,
+                                            null, 0, 0, 0);
+                                } catch (IntentSender.SendIntentException e) {
+                                    Log.e(TAG, "Couldn't start One Tap UI: " + e.getLocalizedMessage());
+                                }
+                            })
+                            .addOnFailureListener(this, e -> {
+                                // No saved credentials found. Launch the One Tap sign-up flow, or
+                                // do nothing and continue presenting the signed-out UI.
+                                Log.d(TAG, e.getLocalizedMessage());
+                            });
                 });
         warning.show();
     }
@@ -315,6 +342,40 @@ public class Login extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
             }
+        } else if (requestCode == REQ_ONE_TAP) {
+            try {
+                SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+                String idToken = credential.getGoogleIdToken();
+                String username = credential.getId();
+                String password = credential.getPassword();
+                if (idToken != null) {
+                    // Got an ID token from Google. Use it to authenticate
+                    // with your backend.
+                    Log.d(TAG, "Got ID token.");
+                    firebaseAuthWithGoogle(idToken);
+                } else if (password != null) {
+                    // Got a saved username and password. Use them to authenticate
+                    // with your backend.
+                    Log.d(TAG, "Got password.");
+                    firebaseAuthWithCredentials(username, password);
+                }
+            } catch (ApiException e) {
+                switch (e.getStatusCode()) {
+                    case CommonStatusCodes.CANCELED:
+                        Log.d(TAG, "One-tap dialog was closed.");
+                        // Don't re-prompt the user.
+                        showOneTapUI = false;
+                        break;
+                    case CommonStatusCodes.NETWORK_ERROR:
+                        Log.d(TAG, "One-tap encountered a network error.");
+                        // Try again or just ignore.
+                        break;
+                    default:
+                        Log.d(TAG, "Couldn't get credential from result."
+                                + e.getLocalizedMessage());
+                        break;
+                }
+            }
         }
     }
 
@@ -333,6 +394,23 @@ public class Login extends AppCompatActivity {
                         updateUI(null);
                     }
                 });
+    }
+
+    private void firebaseAuthWithCredentials(String mEmail, String mPassword) {
+        fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
+            Toast.makeText(this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(this, MainActivity.class);
+//              set the new task and clear flags
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            spinner.setVisibility(View.GONE);
+            startNewActivity(this, Splash.class);
+
+        });
     }
 
     private void updateUI(FirebaseUser user) {
@@ -358,13 +436,16 @@ public class Login extends AppCompatActivity {
             userD.put("UserId", userID);
             userD.put("RegisterOn", FieldValue.serverTimestamp());
 
-            documentReference.set(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for " + userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for " + userID));
+            documentReference.update(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for " + userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for " + userID));
+
+            if (photoUrl != null) {
+                FirebaseStorage.getInstance().getReference().child("users/" + user.getUid() + "/profile.jpg").putFile(photoUrl);
+            }
 
             startNewActivity(this, MainActivity.class);
             finish();
 
         }
     }
-
 
 }
