@@ -22,8 +22,16 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest;
 import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.gms.auth.api.identity.SignInClient;
 import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.Scope;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.Drive;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,10 +41,14 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.gson.Gson;
 import com.rahuls.sharednotes.R;
+import com.rahuls.sharednotes.drive.DriveServiceHelper;
+import com.rahuls.sharednotes.drive.GoogleDriveFileHolder;
 import com.rahuls.sharednotes.model.User;
 import com.rahuls.sharednotes.note.MainActivity;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -56,6 +68,9 @@ public class Register extends AppCompatActivity {
     private BeginSignInRequest signUpRequest;
     private static final int REQ_ONE_TAP = 1007;  // Can be any integer unique to the Activity.
     private boolean showOneTapUI = true;
+    DriveServiceHelper mDriveServiceHelper;
+    GoogleDriveFileHolder fileId;
+    private static final int RC_AUTHORIZE_DRIVE = 1004;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,12 +266,16 @@ public class Register extends AppCompatActivity {
             String userID = user.getUid();
             Toast.makeText(this, "Notes are Synced.", Toast.LENGTH_SHORT).show();
 
+            checkForGooglePermissions();
+            createFolderInDrive("Shared Notes",null);
+
             DocumentReference documentReference = fStore.collection("users").document(userID);
             Map<String, Object> userD = new HashMap<>();
             userD.put("UserName", name);
             userD.put("UserEmail", email);
             userD.put("UserId", userID);
             userD.put("RegisterOn", FieldValue.serverTimestamp());
+            userD.put("ParentFolderId",fileId.getId());
 
             documentReference.set(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for " + userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for " + userID));
 
@@ -268,5 +287,58 @@ public class Register extends AppCompatActivity {
             finish();
 
         }
+    }
+
+    private void checkForGooglePermissions() {
+
+        Scope ACCESS_DRIVE_SCOPE = new Scope(Scopes.DRIVE_FILE);
+        Scope SCOPE_EMAIL = new Scope(Scopes.EMAIL);
+
+        if (!GoogleSignIn.hasPermissions(
+                GoogleSignIn.getLastSignedInAccount(getApplicationContext()),
+                ACCESS_DRIVE_SCOPE,
+                SCOPE_EMAIL)) {
+            GoogleSignIn.requestPermissions(
+                    this,
+                    RC_AUTHORIZE_DRIVE,
+                    GoogleSignIn.getLastSignedInAccount(getApplicationContext()),
+                    ACCESS_DRIVE_SCOPE,
+                    SCOPE_EMAIL);
+        } else {
+            Toast.makeText(this, "Permission to access Drive and Email has been granted", Toast.LENGTH_SHORT).show();
+            driveSetUp();
+
+        }
+    }
+
+    private void driveSetUp() {
+
+        GoogleSignInAccount mAccount = GoogleSignIn.getLastSignedInAccount(this);
+
+        GoogleAccountCredential credential =
+                GoogleAccountCredential.usingOAuth2(
+                        getApplicationContext(), Collections.singleton(Scopes.DRIVE_FILE));
+        credential.setSelectedAccount(mAccount.getAccount());
+        Drive googleDriveService =
+                new Drive.Builder(
+                        AndroidHttp.newCompatibleTransport(),
+                        new GsonFactory(),
+                        credential)
+                        .setApplicationName("Shared Notes")
+                        .build();
+        mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
+    }
+
+    public void createFolderInDrive(String folderName, @Nullable String folderId) {
+
+        Log.i(TAG, "Creating a Folder...");
+        mDriveServiceHelper.createFolder(folderName, folderId)
+                .addOnSuccessListener(googleDriveFileHolder -> {
+
+                    Gson gson = new Gson();
+                    Log.i(TAG, "onSuccess of Folder creation: " + gson.toJson(googleDriveFileHolder));
+                    fileId = googleDriveFileHolder;
+                })
+                .addOnFailureListener(e -> Log.i(TAG, "onFailure of Folder creation: " + e.getMessage()));
     }
 }

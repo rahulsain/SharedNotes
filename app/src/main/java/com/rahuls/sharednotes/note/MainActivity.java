@@ -2,7 +2,9 @@ package com.rahuls.sharednotes.note;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,8 +30,17 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.drive.Drive;
+import com.google.api.services.drive.model.File;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -39,12 +50,16 @@ import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.auth.Login;
 import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
+import com.rahuls.sharednotes.drive.DriveServiceHelper;
+import com.rahuls.sharednotes.drive.GoogleDriveFileHolder;
 import com.rahuls.sharednotes.group.ListGroups;
 import com.rahuls.sharednotes.model.Note;
 import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -59,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     FirebaseAuth fAuth;
     TextView userName;
     TextView userEmail;
+    DriveServiceHelper mDriveServiceHelper;
+    GoogleDriveFileHolder fileId;
+    private static final int RC_AUTHORIZE_DRIVE = 1004;
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +89,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fStore = FirebaseFirestore.getInstance();
         fAuth = FirebaseAuth.getInstance();
         user = fAuth.getCurrentUser();
-
-
 
         Query query = fStore.collection("users").document(user.getUid())
                 .collection("myNotes").orderBy("createdOn", Query.Direction.DESCENDING);
@@ -286,6 +303,105 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             noteContent = itemView.findViewById(R.id.content);
             view = itemView;
             mCardView = itemView.findViewById(R.id.noteCard);
+        }
+    }
+
+    private void checkForGooglePermissions() {
+
+        Scope ACCESS_DRIVE_SCOPE = new Scope(Scopes.DRIVE_FILE);
+        Scope SCOPE_EMAIL = new Scope(Scopes.EMAIL);
+
+        if (!GoogleSignIn.hasPermissions(
+                GoogleSignIn.getLastSignedInAccount(getApplicationContext()),
+                ACCESS_DRIVE_SCOPE,
+                SCOPE_EMAIL)) {
+            GoogleSignIn.requestPermissions(
+                    this,
+                    RC_AUTHORIZE_DRIVE,
+                    GoogleSignIn.getLastSignedInAccount(getApplicationContext()),
+                    ACCESS_DRIVE_SCOPE,
+                    SCOPE_EMAIL);
+        } else {
+            Toast.makeText(this, "Permission to access Drive and Email has been granted", Toast.LENGTH_SHORT).show();
+            driveSetUp();
+
+        }
+
+    }
+
+    private void driveSetUp() {
+
+        GoogleSignInAccount mAccount = GoogleSignIn.getLastSignedInAccount(this);
+
+        GoogleAccountCredential credential =
+                GoogleAccountCredential.usingOAuth2(
+                        getApplicationContext(), Collections.singleton(Scopes.DRIVE_FILE));
+        credential.setSelectedAccount(mAccount.getAccount());
+        Drive googleDriveService =
+                new Drive.Builder(
+                        AndroidHttp.newCompatibleTransport(),
+                        new GsonFactory(),
+                        credential)
+                        .setApplicationName("Shared Notes")
+                        .build();
+        mDriveServiceHelper = new DriveServiceHelper(googleDriveService);
+    }
+
+    public void listFilesInDrive() {
+
+        Log.i(TAG, "Listing Files...");
+        new MyAsyncTask().execute();
+
+    }
+
+    public void downloadFile(java.io.File file,String fileID) {
+
+//        java.io.File file = new java.io.File(getExternalFilesDir(null), "/certificate.jpg");
+        mDriveServiceHelper.downloadFile(file, fileID)
+                .addOnSuccessListener(aVoid -> {
+
+                    Log.i(TAG, "Downloaded the file");
+                    long file_size = file.length() / 1024;
+                    Log.i(TAG, "file Size :" + file_size);
+                    Log.i(TAG, "file Path :" + file.getAbsolutePath());
+//                    Toast.makeText(this,"Downloaded: " + file.getAbsolutePath(),Toast.LENGTH_LONG).show();
+                })
+                .addOnFailureListener(e -> Log.i(TAG, "Failed to Download the file: " + fileID + ", Exception : " + e.getMessage()));
+    }
+
+    public class MyAsyncTask extends AsyncTask<Void, Void, List<File>> {
+
+        List<File> fileList;
+
+        @Override
+        protected List<File> doInBackground(Void... voids) {
+
+            try {
+
+                fileList = mDriveServiceHelper.listDriveImageFiles();
+
+            } catch (IOException e) {
+
+                Log.i(TAG, "IO Exception while fetching file list");
+            }
+
+            return fileList;
+
+        }
+
+        @Override
+        protected void onPostExecute(List<File> files) {
+            super.onPostExecute(files);
+
+            if (files.size() == 0){
+
+                Log.i(TAG, "No Files");
+            }
+            for (File file : files) {
+
+                Log.i(TAG, "\nFound file: File Name :" +
+                        file.getName() + " File Id :" + file.getId());
+            }
         }
     }
 }
