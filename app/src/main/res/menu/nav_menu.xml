@@ -24,7 +24,7 @@
                 android:title="@string/rate_app" />
 
             <item
-                android:id="@+id/shareapp"
+                android:id="@+id/shareApp"
                 android:icon="@drawable/ic_share_black_24dp"
                 android:title="@string/share_app" />
         </menu>

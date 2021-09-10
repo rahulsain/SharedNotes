@@ -80,8 +80,6 @@ dependencies {
     androidTestImplementation "androidx.room:room-testing:$rootProject.roomVersion"
 
     implementation 'com.squareup.picasso:picasso:2.71828'
-
-
 }
 repositories {
     mavenCentral()
