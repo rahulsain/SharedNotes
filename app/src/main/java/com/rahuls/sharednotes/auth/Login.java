@@ -2,6 +2,8 @@ package com.rahuls.sharednotes.auth;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -17,23 +19,43 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.auth.api.identity.BeginSignInRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.auth.api.identity.SignInClient;
+import com.google.android.gms.auth.api.identity.SignInCredential;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.tasks.RuntimeExecutionException;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.storage.FirebaseStorage;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.note.MainActivity;
 import com.rahuls.sharednotes.ui.Splash;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class Login extends AppCompatActivity {
 
     private static final String TAG = "Login";
+    private static final int RC_SIGN_IN = 1009;
+    private static final int REQ_ONE_TAP = 1008;
     EditText lEmail, lPassword;
     Button lButton;
     TextView forgetPassword, createAccount;
@@ -41,6 +63,10 @@ public class Login extends AppCompatActivity {
     FirebaseFirestore fStore;
     FirebaseUser user;
     ProgressBar spinner;
+    GoogleSignInClient mGoogleSignInClient;
+    private SignInClient oneTapClient;
+    private BeginSignInRequest signInRequest;
+    private boolean showOneTapUI = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +74,36 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         Objects.requireNonNull(getSupportActionBar()).setTitle("Login to Shared Notes");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        oneTapClient = Identity.getSignInClient(this);
+        signInRequest = BeginSignInRequest.builder()
+                .setPasswordRequestOptions(BeginSignInRequest.PasswordRequestOptions.builder()
+                        .setSupported(true)
+                        .build())
+                .setGoogleIdTokenRequestOptions(BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                        .setSupported(true)
+                        // Your server's client ID, not your Android client ID.
+                        .setServerClientId(getString(R.string.default_web_client_id))
+                        // Only show accounts previously used to sign in.
+                        .setFilterByAuthorizedAccounts(true)
+                        .build())
+                // Automatically sign in when exactly one credential is retrieved.
+                .setAutoSelectEnabled(true)
+                .build();
+
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+        // Set the dimensions of the sign-in button.
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+
+        signInButton.setOnClickListener(v -> signIn());
 
         lEmail = findViewById(R.id.email);
         lPassword = findViewById(R.id.lPassword);
@@ -85,22 +141,7 @@ public class Login extends AppCompatActivity {
                 Toast.makeText(Login.this, "Some Error occurred, please restart the app", Toast.LENGTH_SHORT).show();
             }
 
-            fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
-                Toast.makeText(this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
-
-                Intent i = new Intent(this, MainActivity.class);
-//              set the new task and clear flags
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(i);
-
-            }).addOnFailureListener(e -> {
-                Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                spinner.setVisibility(View.GONE);
-                startNewActivity(v.getContext(), Splash.class);
-
-            });
-
-
+            firebaseAuthWithCredentials(mEmail, mPassword);
         });
 
         createAccount.setOnClickListener(v -> startNewActivity(v.getContext(), Register.class));
@@ -117,17 +158,17 @@ public class Login extends AppCompatActivity {
             passwordResetDialog.setPositiveButton("Forgot Password", (dialog, which) -> {
                 // extract the email and send reset link
                 String emailId = emailID.getText().toString();
-                if(isValid(emailId)) {
+                if (isValid(emailId)) {
                     fAuth.sendPasswordResetEmail(emailId)
                             .addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(v.getContext(),"Password Reset mail sent. Check your inbox",Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(v.getContext(), "Password Reset mail sent. Check your inbox", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(v.getContext(),"Make sure your email is registered first",Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(v.getContext(), "Make sure your email is registered first", Toast.LENGTH_SHORT).show();
                                 }
                             });
                 } else {
-                    Toast.makeText(v.getContext(),"Email is not valid",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(v.getContext(), "Email is not valid", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -230,7 +271,7 @@ public class Login extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        startNewActivity(this,MainActivity.class);
+        startNewActivity(this, MainActivity.class);
         finish();
         return super.onOptionsItemSelected(item);
     }
@@ -241,8 +282,23 @@ public class Login extends AppCompatActivity {
                 .setPositiveButton("Save Note", (dialog, which) -> {
                     startNewActivity(getApplicationContext(), Register.class);
                     finish();
-                }).setNegativeButton("It's Ok", (dialog, which) -> {
-                    //do nothing
+                }).setNegativeButton("Ok", (dialog, which) -> {
+                    //show one tap signIn google
+                    oneTapClient.beginSignIn(signInRequest)
+                            .addOnSuccessListener(this, result -> {
+                                try {
+                                    startIntentSenderForResult(
+                                            result.getPendingIntent().getIntentSender(), REQ_ONE_TAP,
+                                            null, 0, 0, 0);
+                                } catch (IntentSender.SendIntentException e) {
+                                    Log.e(TAG, "Couldn't start One Tap UI: " + e.getLocalizedMessage());
+                                }
+                            })
+                            .addOnFailureListener(this, e -> {
+                                // No saved credentials found. Launch the One Tap sign-up flow, or
+                                // do nothing and continue presenting the signed-out UI.
+                                Log.d(TAG, e.getLocalizedMessage());
+                            });
                 });
         warning.show();
     }
@@ -264,4 +320,132 @@ public class Login extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
     }
+
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+                Log.w(TAG, "Google sign in failed", e);
+            }
+        } else if (requestCode == REQ_ONE_TAP) {
+            try {
+                SignInCredential credential = oneTapClient.getSignInCredentialFromIntent(data);
+                String idToken = credential.getGoogleIdToken();
+                String username = credential.getId();
+                String password = credential.getPassword();
+                if (idToken != null) {
+                    // Got an ID token from Google. Use it to authenticate
+                    // with your backend.
+                    Log.d(TAG, "Got ID token.");
+                    firebaseAuthWithGoogle(idToken);
+                } else if (password != null) {
+                    // Got a saved username and password. Use them to authenticate
+                    // with your backend.
+                    Log.d(TAG, "Got password.");
+                    firebaseAuthWithCredentials(username, password);
+                }
+            } catch (ApiException e) {
+                switch (e.getStatusCode()) {
+                    case CommonStatusCodes.CANCELED:
+                        Log.d(TAG, "One-tap dialog was closed.");
+                        // Don't re-prompt the user.
+                        showOneTapUI = false;
+                        break;
+                    case CommonStatusCodes.NETWORK_ERROR:
+                        Log.d(TAG, "One-tap encountered a network error.");
+                        // Try again or just ignore.
+                        break;
+                    default:
+                        Log.d(TAG, "Couldn't get credential from result."
+                                + e.getLocalizedMessage());
+                        break;
+                }
+            }
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        fAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithCredential:success");
+                        FirebaseUser user = fAuth.getCurrentUser();
+                        updateUI(user);
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithCredential:failure", task.getException());
+                        updateUI(null);
+                    }
+                });
+    }
+
+    private void firebaseAuthWithCredentials(String mEmail, String mPassword) {
+        fAuth.signInWithEmailAndPassword(mEmail, mPassword).addOnSuccessListener(authResult -> {
+            Toast.makeText(this, "Logged  in Successfully", Toast.LENGTH_SHORT).show();
+
+            Intent i = new Intent(this, MainActivity.class);
+//              set the new task and clear flags
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(i);
+
+        }).addOnFailureListener(e -> {
+            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            spinner.setVisibility(View.GONE);
+            startNewActivity(this, Splash.class);
+
+        });
+    }
+
+    private void updateUI(FirebaseUser user) {
+        if (user != null) {
+            // Name, email address, and profile photo Url
+            String name = user.getDisplayName();
+            String email = user.getEmail();
+            Uri photoUrl = user.getPhotoUrl();
+
+            // Check if user's email is verified
+            boolean emailVerified = user.isEmailVerified();
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getIdToken() instead.
+            String userID = user.getUid();
+            Toast.makeText(this, "Notes are Synced.", Toast.LENGTH_SHORT).show();
+
+            DocumentReference documentReference = fStore.collection("users").document(userID);
+            Map<String, Object> userD = new HashMap<>();
+            userD.put("UserName", name);
+            userD.put("UserEmail", email);
+            userD.put("UserId", userID);
+            userD.put("RegisterOn", FieldValue.serverTimestamp());
+
+            documentReference.update(userD).addOnSuccessListener(aVoid -> Log.d(TAG, "onSuccess: user profile is created for " + userID)).addOnFailureListener(e -> Log.d(TAG, "onFailure: user profile is not created for " + userID));
+
+            if (photoUrl != null) {
+                FirebaseStorage.getInstance().getReference().child("users/" + user.getUid() + "/profile.jpg").putFile(photoUrl);
+            }
+
+            startNewActivity(this, MainActivity.class);
+            finish();
+
+        }
+    }
+
 }

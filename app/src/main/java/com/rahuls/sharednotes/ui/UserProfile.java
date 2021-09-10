@@ -21,6 +21,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -138,6 +139,9 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
                 if(newPassword.isEmpty()){
                     Toast.makeText(v.getContext(),"Password should be atleast of 6 characters.",Toast.LENGTH_SHORT).show();
                     return;
+                } else if(user.isAnonymous()){
+                    Toast.makeText(v.getContext(),"This feature is only available for signed in users.",Toast.LENGTH_SHORT).show();
+                    return;
                 }
                 user.updatePassword(newPassword).addOnSuccessListener(aVoid -> Toast.makeText(v.getContext(), "Password Reset Successfully.", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(v.getContext(), "Password Reset Failed. Try Resigning In", Toast.LENGTH_SHORT).show());
             });
@@ -200,6 +204,7 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
             displayAlert();
         } else {
             fAuth.signOut();
+            Identity.getSignInClient(this).signOut();
             startNewActivity(this, Splash.class);
             finish();
         }

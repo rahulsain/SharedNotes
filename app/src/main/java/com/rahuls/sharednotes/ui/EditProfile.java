@@ -28,6 +28,7 @@ import androidx.core.content.FileProvider;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -120,7 +121,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
         profileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().load(uri).into(profileImageView));
 
         profileImageView.setOnClickListener(v -> {
-            if(userEmail.getText().toString().equals("rahul1champ@gmail.com")) {
+            if(userEmail.getText().toString().equals("rzsfjsk192kds@gmail.com")) {
                 Toast.makeText(EditProfile.this, "Picture can't be changed. Not registered to our database. Sign in first", Toast.LENGTH_SHORT).show();
             } else {
                 startDialog();
@@ -144,7 +145,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
             }
 
             final String email1 = profileEmail.getText().toString();
-            if(userEmail.getText().toString().equals("rahul1champ@gmail.com")) {
+            if(userEmail.getText().toString().equals("rzsfjsk192kds@gmail.com")) {
                 Toast.makeText(v.getContext(), "Email can't be changed. Not registered to our database. Sign in first", Toast.LENGTH_SHORT).show();
             } else {
                 user.updateEmail(email1).addOnSuccessListener(aVoid -> {
@@ -228,6 +229,7 @@ public class EditProfile extends AppCompatActivity implements NavigationView.OnN
             displayAlert();
         } else {
             fAuth.signOut();
+            Identity.getSignInClient(this).signOut();
             startNewActivity(this, Splash.class);
             finish();
         }
