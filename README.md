@@ -16,6 +16,11 @@ Share notes with your team.
 6. Only group admin can add or remove members.
 7. User can leave any group by their choice.
 
+## :bulb: Tech Used
+
+<img src="https://1000logos.net/wp-content/uploads/2020/09/Java-Logo.png" height="70px" width="100px">  <img src="https://www.gstatic.com/devrel-devsite/prod/v1107947142dadf6449a2907ce0a39fab2989512ca62a8e88f40e576d91855aef/firebase/images/touchicon-180.png" height="80px" width="90px"> 
+
+
 ## Contributing 💻
 
 If you have any idea, feel free to fork it and submit your changes back to me. Contributions are appreciated.
