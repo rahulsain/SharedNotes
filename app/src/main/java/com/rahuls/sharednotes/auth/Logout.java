@@ -17,7 +17,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.rahuls.sharednotes.R;
-import com.rahuls.sharednotes.ui.Splash;
 
 public class Logout extends AppCompatActivity {
 
@@ -121,7 +120,7 @@ public class Logout extends AppCompatActivity {
         //delete user from fAuth
 
         user.delete().addOnSuccessListener(aVoid -> {
-            startActivity(new Intent(this, Splash.class));
+            startActivity(new Intent(this, Login.class));
             overridePendingTransition(0,0);
             finish();
         });

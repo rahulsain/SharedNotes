@@ -200,8 +200,8 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
             displayAlert();
         } else {
             fAuth.signOut();
-            startNewActivity(this, Splash.class);
-            finish();
+//            startNewActivity(this, Splash.class);
+//            finish();
         }
     }
 

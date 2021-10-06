@@ -43,7 +43,6 @@ import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
 import com.rahuls.sharednotes.note.AddNote;
 import com.rahuls.sharednotes.note.MainActivity;
-import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
 
 import java.util.List;
@@ -257,7 +256,7 @@ public class ListGroups extends AppCompatActivity implements NavigationView.OnNa
             displayAlert();
         } else {
             fAuth.signOut();
-            startNewActivity(this, Splash.class);
+            startNewActivity(this, Login.class);
             finish();
         }
     }

@@ -40,7 +40,6 @@ import com.rahuls.sharednotes.auth.Logout;
 import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.group.ListGroups;
 import com.rahuls.sharednotes.model.Note;
-import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
 
 import java.util.ArrayList;
@@ -205,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             displayAlert();
         } else {
             fAuth.signOut();
-            startNewActivity(this, Splash.class);
+            startNewActivity(this, Login.class);
             finish();
         }
     }

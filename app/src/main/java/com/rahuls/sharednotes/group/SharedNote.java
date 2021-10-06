@@ -44,7 +44,6 @@ import com.rahuls.sharednotes.auth.Register;
 import com.rahuls.sharednotes.model.Group;
 import com.rahuls.sharednotes.model.Note;
 import com.rahuls.sharednotes.note.MainActivity;
-import com.rahuls.sharednotes.ui.Splash;
 import com.rahuls.sharednotes.ui.UserProfile;
 import com.squareup.picasso.Picasso;
 
@@ -243,7 +242,7 @@ public class SharedNote extends AppCompatActivity implements NavigationView.OnNa
             displayAlert();
         } else {
             fAuth.signOut();
-            startNewActivity(this, Splash.class);
+            startNewActivity(this, Login.class);
             finish();
         }
     }

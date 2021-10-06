@@ -26,7 +26,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.rahuls.sharednotes.R;
 import com.rahuls.sharednotes.note.MainActivity;
-import com.rahuls.sharednotes.ui.Splash;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -96,8 +95,6 @@ public class Login extends AppCompatActivity {
             }).addOnFailureListener(e -> {
                 Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 spinner.setVisibility(View.GONE);
-                startNewActivity(v.getContext(), Splash.class);
-
             });
 
 
