@@ -53,16 +53,11 @@
             android:name=".group.SharedNote"
             android:label="@string/title_activity_shared_note"
             android:theme="@style/AppTheme.NoActionBar" />
-<!--        <activity-->
-<!--            android:name=".ui.Splash"-->
-<!--            android:theme="@style/AppTheme.NoActionBar"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+        <activity
+            android:name=".ui.Splash"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:exported="true">
+        </activity>
         <activity android:name=".auth.Register" />
         <activity android:name=".auth.Login" />
         <activity
