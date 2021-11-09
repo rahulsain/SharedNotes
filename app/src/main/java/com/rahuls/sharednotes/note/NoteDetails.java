@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class NoteDetails extends AppCompatActivity {
         TextView content = findViewById(R.id.noteDetailsContent);
         TextView title = findViewById(R.id.noteDetailsTitle);
         ImageView noteImageView = findViewById(R.id.showNoteImage);
+        Button documentNoteViewButton = findViewById(R.id.showNoteDocument);
         content.setMovementMethod(new ScrollingMovementMethod());
 
         content.setText(data.getStringExtra("content"));
@@ -51,6 +53,20 @@ public class NoteDetails extends AppCompatActivity {
 
         noteImageView.setOnClickListener(v -> ImageViewPopUpHelper.enablePopUpOnClick(this,noteImageView));
 
+
+        StorageReference documentRef = FirebaseStorage.getInstance().getReference().child("users/" + FirebaseAuth.getInstance().getCurrentUser().getUid() + "/myNotes/" + data.getStringExtra("noteId") + "/documentNote.pdf");
+        documentRef.getDownloadUrl().addOnSuccessListener(uri -> {
+            documentNoteViewButton.setVisibility(View.VISIBLE);
+            documentNoteViewButton.setOnClickListener(v -> {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW);
+                browserIntent.setDataAndType(uri,"application/pdf");
+
+                Intent chooser = Intent.createChooser(browserIntent, "View PDF File Using");
+                chooser.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // optional
+
+                startActivity(chooser);
+            });
+        }).addOnFailureListener(onFailure -> documentNoteViewButton.setVisibility(View.GONE));
 
         FloatingActionButton fab = findViewById(R.id.fab2);
         fab.setOnClickListener(view -> {

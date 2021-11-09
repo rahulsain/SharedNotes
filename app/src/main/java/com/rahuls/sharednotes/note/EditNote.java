@@ -3,6 +3,7 @@ package com.rahuls.sharednotes.note;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -24,6 +25,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,17 +53,19 @@ public class EditNote extends AppCompatActivity {
     private static final int GALLERY_INTENT_CODE = 105;
     private static final int CAMERA_INTENT_CODE = 102;
     private static final int CAMERA_PERM_CODE = 101;
+    private static final int DOCUMENT_INTENT_CODE = 104;
     Intent data;
     EditText editNoteTitle, editNoteContent;
     FirebaseFirestore fStore;
     ProgressBar spinner;
     FirebaseUser user;
     String currentPhotoPath;
-    Button editPhotoButton;
+    Button editPhotoButton, editDocumentButton;
     StorageReference storageReference;
     ImageView noteImageView;
-    Uri photoURI = null;
+    Uri photoURI = null, imageURI = null;
     StorageReference fileRef;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +85,7 @@ public class EditNote extends AppCompatActivity {
         editNoteContent = findViewById(R.id.editNoteContent);
 
         editPhotoButton = findViewById(R.id.edit_photo);
+        editDocumentButton = findViewById(R.id.edit_document);
         noteImageView = findViewById(R.id.editNoteImage);
 
         editNoteTitle.setText(data.getStringExtra("title"));
@@ -122,6 +129,14 @@ public class EditNote extends AppCompatActivity {
             });
         });
         editPhotoButton.setOnClickListener(v -> startDialog());
+        editDocumentButton.setOnClickListener(v -> {
+            Intent galleryIntent = new Intent();
+            galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+            // We will be redirected to choose pdf
+            galleryIntent.setType("application/pdf");
+            startActivityForResult(galleryIntent, DOCUMENT_INTENT_CODE);
+        });
     }
 
     private void startDialog() {
@@ -166,9 +181,8 @@ public class EditNote extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
-        if (requestCode == CAMERA_INTENT_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == CAMERA_INTENT_CODE) {
                 File f = new File(currentPhotoPath);
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 Uri contentUri = Uri.fromFile(f);
@@ -177,15 +191,52 @@ public class EditNote extends AppCompatActivity {
                 noteImageView.setImageURI(contentUri);
                 noteImageView.setVisibility(View.VISIBLE);
                 photoURI = contentUri;
-            }
-        }
-
-        if (requestCode == GALLERY_INTENT_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+            } else if (requestCode == GALLERY_INTENT_CODE) {
                 Uri imageUri = data != null ? data.getData() : null;
                 noteImageView.setImageURI(imageUri);
                 noteImageView.setVisibility(View.VISIBLE);
                 photoURI = imageUri;
+            } else if (requestCode == DOCUMENT_INTENT_CODE) {
+                // Here we are initialising the progress dialog box
+                dialog = new ProgressDialog(EditNote.this);
+                dialog.setMessage("Uploading");
+
+                // this will show message uploading
+                // while pdf is uploading
+                dialog.show();
+                imageURI = data.getData();
+                final String timestamp = "" + System.currentTimeMillis();
+                final String messagePushID = timestamp;
+                Toast.makeText(EditNote.this, imageURI.toString(), Toast.LENGTH_SHORT).show();
+
+                // Here we are uploading the pdf in firebase storage with the name of current time
+                final StorageReference filepath = storageReference.child("users/" + user.getUid() + "/myNotes/" + data.getStringExtra("noteId") + "/documentNote.pdf");
+                Toast.makeText(EditNote.this, filepath.getName(), Toast.LENGTH_SHORT).show();
+                filepath.putFile(imageURI).continueWithTask(new Continuation() {
+                    @Override
+                    public Object then(@NonNull Task task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        return filepath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            // After uploading is done it progress
+                            // dialog box will be dismissed
+                            dialog.dismiss();
+                            Uri uri = task.getResult();
+                            String myurl;
+                            myurl = uri.toString();
+                            Toast.makeText(EditNote.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dialog.dismiss();
+                            Toast.makeText(EditNote.this, "UploadedFailed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
             }
         }
     }

@@ -3,6 +3,7 @@ package com.rahuls.sharednotes.note;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -26,6 +27,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,20 +51,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+
 public class AddNote extends AppCompatActivity {
 
-    FirebaseFirestore fStore;
-    EditText noteTitle,noteContent;
-    ProgressBar progressBarSave;
-    FirebaseUser user;
-    Button addPhotoButton;
-    String currentPhotoPath,noteId;
-    StorageReference storageReference;
-    ImageView noteImageView;
     private static final int GALLERY_INTENT_CODE = 105;
+    private static final int DOCUMENT_INTENT_CODE = 104;
     private static final int CAMERA_INTENT_CODE = 102;
     private static final int CAMERA_PERM_CODE = 101;
-    Uri photoURI = null;
+    FirebaseFirestore fStore;
+    EditText noteTitle, noteContent;
+    ProgressBar progressBarSave;
+    FirebaseUser user;
+    Button addPhotoButton, addDocumentButton;
+    String currentPhotoPath, noteId;
+    StorageReference storageReference;
+    ImageView noteImageView;
+    Uri photoURI = null, imageURI = null;
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +86,9 @@ public class AddNote extends AppCompatActivity {
 
         progressBarSave = findViewById(R.id.progressBar1);
         addPhotoButton = findViewById(R.id.add_photo);
+        addDocumentButton = findViewById(R.id.add_document);
         noteImageView = findViewById(R.id.addNoteImage);
-        
+
         FloatingActionButton fab = findViewById(R.id.fab1);
         fab.setOnClickListener(view -> {
 
@@ -89,8 +97,8 @@ public class AddNote extends AppCompatActivity {
             String nTitle = noteTitle.getText().toString();
             String nContent = noteContent.getText().toString();
 
-            if(nTitle.isEmpty() || nContent.isEmpty()){
-                Toast.makeText(AddNote.this,"Title or Content cant be empty",Toast.LENGTH_SHORT).show();
+            if (nTitle.isEmpty() || nContent.isEmpty()) {
+                Toast.makeText(AddNote.this, "Title or Content cant be empty", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -100,9 +108,9 @@ public class AddNote extends AppCompatActivity {
             DocumentReference documentReference = fStore.collection("users").document(user.getUid())
                     .collection("myNotes").document(noteId);
 
-            Map<String,Object> note = new HashMap<>();
-            note.put("title",nTitle);
-            note.put("content",nContent);
+            Map<String, Object> note = new HashMap<>();
+            note.put("title", nTitle);
+            note.put("content", nContent);
             note.put("createdOn", FieldValue.serverTimestamp());
 
             documentReference.set(note).addOnSuccessListener(aVoid -> {
@@ -115,18 +123,26 @@ public class AddNote extends AppCompatActivity {
         });
 
         addPhotoButton.setOnClickListener(v -> startDialog());
+        addDocumentButton.setOnClickListener(v -> {
+            Intent galleryIntent = new Intent();
+            galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+
+            // We will be redirected to choose pdf
+            galleryIntent.setType("application/pdf");
+            startActivityForResult(galleryIntent, DOCUMENT_INTENT_CODE);
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.close_menu,menu);
+        getMenuInflater().inflate(R.menu.close_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if(item.getItemId() == R.id.close){
-            Toast.makeText(this, "Note is not saved",Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.close) {
+            Toast.makeText(this, "Note is not saved", Toast.LENGTH_SHORT).show();
             onBackPressed();
         }
         return super.onOptionsItemSelected(item);
@@ -141,7 +157,7 @@ public class AddNote extends AppCompatActivity {
         myAlertDialog.setPositiveButton("Gallery",
                 (arg0, arg1) -> {
                     Intent openGalleryIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    startActivityForResult(openGalleryIntent,GALLERY_INTENT_CODE);
+                    startActivityForResult(openGalleryIntent, GALLERY_INTENT_CODE);
                 });
 
         myAlertDialog.setNegativeButton("Camera",
@@ -150,8 +166,8 @@ public class AddNote extends AppCompatActivity {
     }
 
     private void askCameraPermissions() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, CAMERA_PERM_CODE );
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERM_CODE);
         } else {
             dispatchTakePictureIntent();
         }
@@ -174,9 +190,8 @@ public class AddNote extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @androidx.annotation.Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
-        if (requestCode == CAMERA_INTENT_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == CAMERA_INTENT_CODE) {
                 File f = new File(currentPhotoPath);
                 Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
                 Uri contentUri = Uri.fromFile(f);
@@ -185,11 +200,48 @@ public class AddNote extends AppCompatActivity {
                 noteImageView.setImageURI(contentUri);
                 noteImageView.setVisibility(View.VISIBLE);
                 photoURI = contentUri;
-            }
-        }
+            } else if (requestCode == DOCUMENT_INTENT_CODE) {
+                // Here we are initialising the progress dialog box
+                dialog = new ProgressDialog(AddNote.this);
+                dialog.setMessage("Uploading");
 
-        if (requestCode == GALLERY_INTENT_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
+                // this will show message uploading
+                // while pdf is uploading
+                dialog.show();
+                imageURI = data.getData();
+                final String timestamp = "" + System.currentTimeMillis();
+                final String messagePushID = timestamp;
+                Toast.makeText(AddNote.this, imageURI.toString(), Toast.LENGTH_SHORT).show();
+
+                // Here we are uploading the pdf in firebase storage with the name of current time
+                final StorageReference filepath = storageReference.child("users/" + user.getUid() + "/myNotes/" + noteId + "/documentNote.pdf");
+                Toast.makeText(AddNote.this, filepath.getName(), Toast.LENGTH_SHORT).show();
+                filepath.putFile(imageURI).continueWithTask(new Continuation() {
+                    @Override
+                    public Object then(@NonNull Task task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        return filepath.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            // After uploading is done it progress
+                            // dialog box will be dismissed
+                            dialog.dismiss();
+                            Uri uri = task.getResult();
+                            String myurl;
+                            myurl = uri.toString();
+                            Toast.makeText(AddNote.this, "Uploaded Successfully", Toast.LENGTH_SHORT).show();
+                        } else {
+                            dialog.dismiss();
+                            Toast.makeText(AddNote.this, "UploadedFailed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            } else if (requestCode == GALLERY_INTENT_CODE) {
                 Uri imageUri = data != null ? data.getData() : null;
                 noteImageView.setImageURI(imageUri);
                 noteImageView.setVisibility(View.VISIBLE);
@@ -200,8 +252,8 @@ public class AddNote extends AppCompatActivity {
 
     private void uploadImageToFirebase(@Nullable Uri imageUri) {
         // upload image to firebase storage
-        if(imageUri != null){
-            final StorageReference fileRef = storageReference.child("users/"+user.getUid()+"/myNotes/" + noteId +"/imageNote.jpg");
+        if (imageUri != null) {
+            final StorageReference fileRef = storageReference.child("users/" + user.getUid() + "/myNotes/" + noteId + "/imageNote.jpg");
             fileRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> fileRef.getDownloadUrl().addOnSuccessListener(uri -> Picasso.get().load(uri).into(noteImageView))).addOnFailureListener(e -> Toast.makeText(getApplicationContext(), "Failed.", Toast.LENGTH_SHORT).show());
         }
     }
