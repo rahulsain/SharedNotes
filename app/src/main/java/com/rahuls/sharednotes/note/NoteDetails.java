@@ -37,6 +37,7 @@ public class NoteDetails extends AppCompatActivity {
         TextView content = findViewById(R.id.noteDetailsContent);
         TextView title = findViewById(R.id.noteDetailsTitle);
         ImageView noteImageView = findViewById(R.id.showNoteImage);
+        ImageView iv_share_note = findViewById(R.id.iv_share_note);
         Button documentNoteViewButton = findViewById(R.id.showNoteDocument);
         content.setMovementMethod(new ScrollingMovementMethod());
 
@@ -75,6 +76,14 @@ public class NoteDetails extends AppCompatActivity {
             intent.putExtra("content",data.getStringExtra("content"));
             intent.putExtra("noteId",data.getStringExtra("noteId"));
             startActivity(intent);
+        });
+
+        iv_share_note.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Shared Note");
+            intent.putExtra(Intent.EXTRA_TEXT, "Title: " + data.getStringExtra("title") + "\n\n" + data.getStringExtra("content"));
+            startActivity(Intent.createChooser(intent, "Share Note"));
         });
     }
 

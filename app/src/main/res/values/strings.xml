@@ -73,4 +73,5 @@
     <string name="version_number">1.00001</string>
     <string name="created_by">Created by %s</string>
     <string name="sign_up_with_google">Sign Up with Google</string>
+    <string name="share_note">Share Note</string>
 </resources>
