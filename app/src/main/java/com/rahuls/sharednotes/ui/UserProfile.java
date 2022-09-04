@@ -3,6 +3,7 @@ package com.rahuls.sharednotes.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -21,6 +22,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -138,6 +140,9 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
                 if(newPassword.isEmpty()){
                     Toast.makeText(v.getContext(),"Password should be atleast of 6 characters.",Toast.LENGTH_SHORT).show();
                     return;
+                } else if(user.isAnonymous()){
+                    Toast.makeText(v.getContext(),"This feature is only available for signed in users.",Toast.LENGTH_SHORT).show();
+                    return;
                 }
                 user.updatePassword(newPassword).addOnSuccessListener(aVoid -> Toast.makeText(v.getContext(), "Password Reset Successfully.", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(v.getContext(), "Password Reset Failed. Try Resigning In", Toast.LENGTH_SHORT).show());
             });
@@ -188,6 +193,20 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
             }
         } else if (itemId == R.id.logout) {
             checkUser();
+        } else if (itemId == R.id.rating) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.rahuls.sharednotes")));
+            }
+            catch (android.content.ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.rahuls.sharednotes")));
+            }
+        } else if (itemId == R.id.shareApp) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT,
+                    "Hey check out my app at: https://play.google.com/store/apps/details?id=com.rahuls.sharednotes");
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
         } else {
             Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
@@ -200,6 +219,7 @@ public class UserProfile extends AppCompatActivity implements NavigationView.OnN
             displayAlert();
         } else {
             fAuth.signOut();
+            Identity.getSignInClient(this).signOut();
             startNewActivity(this, Splash.class);
             finish();
         }

@@ -2,6 +2,7 @@ package com.rahuls.sharednotes.note;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -27,6 +28,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.auth.api.identity.Identity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -193,6 +195,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         } else if (itemId == R.id.logout) {
             checkUser();
+        } else if (itemId == R.id.rating) {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.rahuls.sharednotes")));
+            }
+            catch (android.content.ActivityNotFoundException e) {
+                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=com.rahuls.sharednotes")));
+            }
+        } else if (itemId == R.id.shareApp) {
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT,
+                    "Hey check out my app at: https://play.google.com/store/apps/details?id=com.rahuls.sharednotes");
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
         } else {
             Toast.makeText(this, "Coming Soon", Toast.LENGTH_SHORT).show();
         }
@@ -205,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             displayAlert();
         } else {
             fAuth.signOut();
+            Identity.getSignInClient(this).signOut();
             startNewActivity(this, Splash.class);
             finish();
         }

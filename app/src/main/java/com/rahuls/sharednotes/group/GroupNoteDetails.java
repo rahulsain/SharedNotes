@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +33,7 @@ public class GroupNoteDetails extends AppCompatActivity {
 
         TextView content = findViewById(R.id.noteDetailsContent);
         TextView title = findViewById(R.id.noteDetailsTitle);
+        ImageView iv_share_note = findViewById(R.id.iv_share_note);
         content.setMovementMethod(new ScrollingMovementMethod());
 
         String contentS = data.getStringExtra("content");
@@ -56,6 +58,14 @@ public class GroupNoteDetails extends AppCompatActivity {
             intent.putExtra("groupId",data.getStringExtra("groupId"));
             intent.putExtra("UserName",data.getStringExtra("UserName"));
             startActivity(intent);
+        });
+
+        iv_share_note.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Shared Note");
+            intent.putExtra(Intent.EXTRA_TEXT, "Title: " + data.getStringExtra("title") + "\n\n" + data.getStringExtra("content"));
+            startActivity(Intent.createChooser(intent, "Share Note"));
         });
     }
 

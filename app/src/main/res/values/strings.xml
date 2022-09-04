@@ -21,7 +21,7 @@
     <string name="shared_notes">Shared Notes</string>
     <string name="share_your_notebook_with_your_team">Share Your Notebook With Your Team</string>
     <string name="rahul_sain">Rahul Sain</string>
-    <string name="rahul1champ_gmail_com">rahul1champ@gmail.com</string>
+    <string name="rahul1champ_gmail_com">rzsfjsk192kds@gmail.com</string>
     <string name="user_name">User Name</string>
     <string name="user_profile_image">User Profile Image</string>
     <string name="your_email_address">Your Email Address</string>
@@ -72,4 +72,6 @@
     <string name="version_name">Version</string>
     <string name="version_number">1.00001</string>
     <string name="created_by">Created by %s</string>
+    <string name="sign_up_with_google">Sign Up with Google</string>
+    <string name="share_note">Share Note</string>
 </resources>
